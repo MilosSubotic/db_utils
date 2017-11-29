@@ -10,7 +10,7 @@
 D="${@: -1}"
 while true;
 do
-	FIND_RES=$(find "$D" -maxdepth 1 -type d -name db_utils)
+	FIND_RES=$(find "$D" -maxdepth 1 -type f -name *.sqlite)
 	if test "$FIND_RES" != ""
 	then
 		break
@@ -25,9 +25,12 @@ do
 	D=$(dirname "$D")
 done
 
-"$D/db_utils/mv_papers.py" "$@"
+pushd "$D" 1>/dev/null
+mv_papers.py "$@"
+R=$?
+popd 1>/dev/null
 
-exit $?
+exit $R
 
 ###############################################################################
 
