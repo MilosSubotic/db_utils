@@ -65,6 +65,7 @@
 		- Do it for all.
 		-+ If `BibTeX` is a book write 'Book' to the 
 			`Journal_Conference_Other_Source`
+		- Do not update and print it if all fields are same.
 
 	+ dump_cites.py:
 		- Dump all cites from DB to the file.
