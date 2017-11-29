@@ -14,3 +14,13 @@ create view Subgridding_Papers as
 
 -- Delete view.
 drop view Subgridding_Papers;
+
+
+-- Copy table.
+create table Papers2 as select * from Papers;
+-- Clear table.
+delete from Papers;
+-- Extract something.
+insert into Papers select * from Papers2 where Subject_Field = "Tesla turbine";
+insert into Papers select * from Papers2 where Subject_Field = "Hydrostatic transmission";
+drop table Papers2;
