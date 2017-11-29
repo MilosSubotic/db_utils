@@ -1,0 +1,114 @@
+
+- SQLite DB field groups by source:
+	- BibTeX related:
+		`Title`
+		`Journal_Conference_Other_Source` foreign
+		`Year`
+		`Cite_Key` (TODO Add)
+		`BibTeX`
+	- Search related:
+		`Where_searched`
+		`Search_keywords`
+		`Reference_from`
+		`Reference_number`
+		`Because_it_cited`
+		`Interesting_author`
+	- File related:
+		`File`
+	- User input:
+		`Subject_Field`
+		`Why_interesting`
+		`TODO`
+		`Printed`
+		`Read`
+		`Review_and_Conclusions`
+		`Interesting_Keywords`
+
+- Status of paper:
+	- 'In hunt dir'
+	- 'In file tree'
+	- 'Empty BibTeX'
+	- 'Have BibTeX'
+	
+	
+- Scripts:
+	+ mv_papers.py:
+		- 'In hunt dir'
+		- cmd line args like mv command
+		- Move it in file tree
+			- mkdir() along the way
+		- Fill:
+			`Where_searched`
+			`Search_keywords`
+			`Reference_from`
+			`File`
+		- If don't have `Title`, make new entry, even with wrong name. 
+			Then update `File` and other fields.
+		- Move it to itself, for those which are already in tree, 
+			but not in DB.
+		- After:
+			- Then, explicitly create/update BibTeX.
+			- Then, explicitly update other fields.
+	+ update_bibtex.py:
+		-+Create/update `BibTeX` from CrossRef or just make it nicer, 
+			by explicitly giving it's which entries.
+		+ Search for CrossRef by paper name.
+		- Params:
+			-+ Name i.e. regex to match name.
+			+ Index.
+			+ Two names or indices are range.	
+			-+ Without params means update those who don't have cites 
+				(or just last ones).
+
+	+ update_fields.py:
+		- From `BibTeX` update other fields: `Title`, `Journal`, `Year`...
+		- Do it for all.
+		-+ If `BibTeX` is a book write 'Book' to the 
+			`Journal_Conference_Other_Source`
+
+	+ dump_cites.py:
+		- Dump all cites from DB to the file.
+			+ One time need to make diff what don't have in DB and 
+				to add it by hand.
+
+	+ list_non_added_papers.py:
+		- Print not added files.
+		- .dbignore:
+			- .gitignore-like ignoring files.
+	+ add_papers.py:
+		- Just add paper to DB.
+
+	- ref_and_cite_nums.py:
+		- `Reference_number`
+		- `Citation_number`
+		- Fill from online
+		
+- Other:
+	- SQLiteBrowser:
+		- Field coloring:
+			- `Journal_Conference_Other_Source`:
+				- Red if empty
+				- Yellow if not in "Journals"
+			- `File`:
+				- Yellow if empty
+			- `BibTeX`:
+				- Red if empty
+	- Shuffle fields
+	- Rename some fields
+	- Correct SPAM, IEEE to IEEE SPAM
+	
+	
+- Old scripts:
+	+ upadate_cites.py:
+		- PRIORITY
+		- Correcty stuff like {FDTD} to {{FDTD}}...
+		- Print those refs in file but not in DB.
+		+ Needs BibTeX parsing
+			+ bibtexparser
+	+ correct_bibtex.py:
+		+ 'Have BibTeX'
+		+ Parse `BibTeX`
+		+ Update `BibTeX` with online version
+		+ Check BibTeX related fields
+
+
