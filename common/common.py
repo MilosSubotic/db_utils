@@ -15,6 +15,7 @@ __copyright__   = 'MIT'
 
 import os
 import sys
+import glob
 import re
 import inspect
 import errno
@@ -22,11 +23,27 @@ import fnmatch
 
 ###############################################################################
 
-script_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-root_dir = os.path.dirname(script_dir)
-#TODO More generic so this same code could be shared.
-db_file = os.path.join(root_dir, 'MWT_Papers.sqlite')
-
+d = os.getcwd()
+while True:
+	os.listdir(d)
+	r = glob.glob(os.path.join(d, '*.sqlite'))
+	if len(r) == 0:
+		d2 = os.path.dirname(d)
+		if d == d2:
+			print('Not in DB tree!', file = sys.stderr)
+			sys.exit(1)
+		else:
+			# Search futher.
+			d = d2
+	elif len(r) == 1:
+		root_dir = d
+		db_file = r[0]
+		break
+	else:
+		print('More than one DB file!', file = sys.stderr)
+		sys.exit(1)
+		
+###############################################################################
 
 # Whole expression.
 _debugRegex = re.compile(r'\bdebug\s*\(\s*(.*)\s*\)')
