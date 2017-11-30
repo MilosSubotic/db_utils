@@ -53,19 +53,19 @@ def fill_db(src, dst):
 	else:
 		reason = None
 	
-	print('"Title" = ', title_field)
-	print('"File" = ', file_field)
+	print('`Title` = ', title_field)
+	print('`File` = ', file_field)
 	if where_searched_field:
-		print('"Where_searched" = ', where_searched_field)
+		print('`Where_searched` = ', where_searched_field)
 	if search_keywords_field:
-		print('"Search_keywords" = ', search_keywords_field)
+		print('`Search_keywords` = ', search_keywords_field)
 	if reference_from_field:
-		print('"Reference_from" = ', reference_from_field)
+		print('`Reference_from` = ', reference_from_field)
 	
 	con = sqlite3.connect(db_file)
 	cur = con.cursor()
 
-	cur.execute('select "Title" from "Papers"')
+	cur.execute("select `Title` from `Papers`")
 	titles = [ t[0] for t in cur.fetchall()]
 	
 	already_exists = False
@@ -80,36 +80,22 @@ def fill_db(src, dst):
 	if already_exists:
 		# If there is no new value for field, use that alredy in table.
 		if not where_searched_field:
-			cur.execute(
-				'select "Where_searched" from "Papers" where "Title"=?',
-				(title_field,)
-			)
+			cur.execute("select `Where_searched` from `Papers` where `Title`=?", (title_field,))
 			where_searched_field = cur.fetchall()[0][0]
 		if not search_keywords_field:
-			cur.execute(
-				'select "Search_keywords" from "Papers" where "Title"=?',
-				(title_field,)
-			)
+			cur.execute("select `Search_keywords` from `Papers` where `Title`=?", (title_field,))
 			search_keywords_field = cur.fetchall()[0][0]
 		if not reference_from_field:
-			cur.execute(
-				'select "Reference_from" from "Papers" where "Title"=?',
-				(title_field,)
-			)
+			cur.execute("select `Reference_from` from `Papers` where `Title`=?", (title_field,))
 			reference_from_field = cur.fetchall()[0][0]
 		cur.execute(
-			'update "Papers" set "File"=?, "Where_searched"=?, '\
-				'"Search_keywords"=?, "Reference_from"=? where "Title"=?', 
-			(file_field, where_searched_field, search_keywords_field, 
-				reference_from_field, title_field)
+			"update `Papers` set `File`=?, `Where_searched`=?, `Search_keywords`=?, `Reference_from`=? where `Title`=?", 
+			(file_field, where_searched_field, search_keywords_field, reference_from_field, title_field)
 		)
 	else:
 		cur.execute(
-			'insert into "Papers" ("File", "Where_searched", '\
-				'"Search_keywords", "Reference_from", "Title")'\
-				' values (?, ?, ?, ?, ?)', 
-			(file_field, where_searched_field, search_keywords_field, 
-				reference_from_field, title_field)
+			"insert into `Papers` (`File`, `Where_searched`, `Search_keywords`, `Reference_from`, `Title`) values (?, ?, ?, ?, ?)", 
+			(file_field, where_searched_field, search_keywords_field, reference_from_field, title_field)
 		)
 	
 	con.commit()

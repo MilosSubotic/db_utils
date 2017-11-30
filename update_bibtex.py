@@ -4,7 +4,7 @@
 # because python 3.2 cannot use bibtexparser.
 
 '''
-Create/update "BibTeX" in database with crossref.org online version.
+Create/update `BibTeX` in database with crossref.org online version.
 Counting start from 1.
 '''
 
@@ -192,7 +192,7 @@ def update_bibtex_string(i, bs1):
 		print(r2.url)
 		return bs1
 	
-	bs2 = r2.content.decode('utf-8')
+	bs2 = r2.content.decode("utf-8")
 	bd2t = bib.loads(bs2, create_parser())
 	
 	bd2 = BibDatabase()
@@ -283,7 +283,7 @@ def create_bibtex_string(i, title):
 		print(r2.url)
 		return None
 	
-	bs2 = r2.content.decode('utf-8')
+	bs2 = r2.content.decode("utf-8")
 	bd2t = bib.loads(bs2, create_parser())
 	
 	bd2 = BibDatabase()
@@ -331,7 +331,7 @@ def update_bibtex_range(range_start, range_end):
 	con = sqlite3.connect(db_file)
 	cur = con.cursor()
 	
-	cur.execute('select "Title", "BibTeX" from "Papers"')
+	cur.execute("select `Title`, `BibTeX` from `Papers`")
 	t1 = cur.fetchall()
 	titles = [tt[0] for tt in t1]
 	bibtexes = [tt[1] for tt in t1]
@@ -359,7 +359,7 @@ def update_bibtex_range(range_start, range_end):
 	
 	for i in r:
 		cur.execute(
-			'update "Papers" set "BibTeX"=? where "Title"=?',
+			"update `Papers` set `BibTeX`=? where `Title`=?",
 			(bibtexes[i], titles[i])
 		)
 		

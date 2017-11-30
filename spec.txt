@@ -1,28 +1,28 @@
 
 - SQLite DB field groups by source:
 	- BibTeX related:
-		"Title"
-		"Journal_Conference_Other_Source" foreign
-		"Year"
-		"Cite_Key" (TODO Add)
-		"BibTeX"
+		`Title`
+		`Journal_Conference_Other_Source` foreign
+		`Year`
+		`Cite_Key` (TODO Add)
+		`BibTeX`
 	- Search related:
-		"Where_searched"
-		"Search_keywords"
-		"Reference_from"
-		"Reference_number"
-		"Because_it_cited"
-		"Interesting_author"
+		`Where_searched`
+		`Search_keywords`
+		`Reference_from`
+		`Reference_number`
+		`Because_it_cited`
+		`Interesting_author`
 	- File related:
-		"File"
+		`File`
 	- User input:
-		"Subject_Field"
-		"Why_interesting"
-		"TODO"
-		"Printed"
-		"Read"
-		"Review_and_Conclusions"
-		"Interesting_Keywords"
+		`Subject_Field`
+		`Why_interesting`
+		`TODO`
+		`Printed`
+		`Read`
+		`Review_and_Conclusions`
+		`Interesting_Keywords`
 
 - Status of paper:
 	- 'In hunt dir'
@@ -38,19 +38,19 @@
 		- Move it in file tree
 			- mkdir() along the way
 		- Fill:
-			"Where_searched"
-			"Search_keywords"
-			"Reference_from"
-			"File"
-		- If don't have "Title", make new entry, even with wrong name. 
-			Then update "File" and other fields.
+			`Where_searched`
+			`Search_keywords`
+			`Reference_from`
+			`File`
+		- If don't have `Title`, make new entry, even with wrong name. 
+			Then update `File` and other fields.
 		- Move it to itself, for those which are already in tree, 
 			but not in DB.
 		- After:
 			- Then, explicitly create/update BibTeX.
 			- Then, explicitly update other fields.
 	+ update_bibtex.py:
-		-+Create/update "BibTeX" from CrossRef or just make it nicer, 
+		-+Create/update `BibTeX` from CrossRef or just make it nicer, 
 			by explicitly giving it's which entries.
 		+ Search for CrossRef by paper name.
 		- Params:
@@ -61,10 +61,10 @@
 				(or just last ones).
 
 	+ update_fields.py:
-		- From "BibTeX" update other fields: "Title", "Journal", "Year"...
+		- From `BibTeX` update other fields: `Title`, `Journal`, `Year`...
 		- Do it for all.
-		-+ If "BibTeX" is a book write 'Book' to the 
-			"Journal_Conference_Other_Source"
+		-+ If `BibTeX` is a book write 'Book' to the 
+			`Journal_Conference_Other_Source`
 		- Do not update and print it if all fields are same.
 
 	+ dump_cites.py:
@@ -80,19 +80,19 @@
 		- Just add paper to DB.
 
 	- ref_and_cite_nums.py:
-		- "Reference_number"
-		- "Citation_number"
+		- `Reference_number`
+		- `Citation_number`
 		- Fill from online
 		
 - Other:
 	- SQLiteBrowser:
 		- Field coloring:
-			- "Journal_Conference_Other_Source":
+			- `Journal_Conference_Other_Source`:
 				- Red if empty
 				- Yellow if not in "Journals"
-			- "File":
+			- `File`:
 				- Yellow if empty
-			- "BibTeX":
+			- `BibTeX`:
 				- Red if empty
 	- Shuffle fields
 	- Rename some fields
@@ -108,8 +108,8 @@
 			+ bibtexparser
 	+ correct_bibtex.py:
 		+ 'Have BibTeX'
-		+ Parse "BibTeX"
-		+ Update "BibTeX" with online version
+		+ Parse `BibTeX`
+		+ Update `BibTeX` with online version
 		+ Check BibTeX related fields
 
 
