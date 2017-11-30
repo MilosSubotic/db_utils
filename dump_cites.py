@@ -4,7 +4,7 @@
 # because python 3.2 cannot use bibtexparser.
 
 '''
-Dump all non-empty, non-TODO `BibTeX` fields to 'cites.bib' file.
+Dump all non-empty, non-TODO "BibTeX" fields to 'cites.bib' file.
 '''
 
 ###############################################################################
@@ -44,7 +44,7 @@ def dump_cites():
 	con = sqlite3.connect(db_file)
 	cur = con.cursor()
 	
-	cur.execute("select `Title`, `BibTeX` from `Papers`")
+	cur.execute('select "Title", "BibTeX" from "Papers"')
 	t1 = cur.fetchall()
 	titles = [tt[0] for tt in t1]
 	bibtexes = [tt[1] for tt in t1]

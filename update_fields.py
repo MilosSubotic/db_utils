@@ -4,7 +4,7 @@
 # because python 3.2 cannot use bibtexparser.
 
 '''
-From `BibTeX` update other fields: `Title`, `Journal`, `Year`...
+From "BibTeX" update other fields: "Title", "Journal", "Year"...
 '''
 
 ###############################################################################
@@ -33,9 +33,9 @@ from bibtexparser.bparser import BibTexParser
 ###############################################################################
 
 db_to_bib_fields = {
-	'Title' : ['title'],
-	'Journal_Conference_Other_Source' : ['journal', 'booktitle'],
-	'Year' : ['year']
+	"Title" : ["Title"],
+	"Journal_Conference_Other_Source" : ['journal', 'booktitle'],
+	"Year" : ['year']
 }
 
 ###############################################################################
@@ -51,7 +51,7 @@ def update_fields():
 	fields_table = []
 	title_idx = None
 	for (i, (d, b)) in enumerate(db_to_bib_fields.items()):
-		if d == 'Title':
+		if d == "Title":
 			title_idx = i
 		fields_table.append((i, d, b))
 	assert title_idx != None
@@ -59,11 +59,11 @@ def update_fields():
 	con = sqlite3.connect(db_file)
 	cur = con.cursor()
 	
-	fts = "" # Fields to select.
+	fts = '' # Fields to select.
 	for (i, d, b) in fields_table:
-		fts += "`" + d + "`, "
+		fts += '"' + d + '", '
 	
-	cur.execute("select {0}`File`, `BibTeX` from `Papers`".format(fts))
+	cur.execute('select {0}"File", "BibTeX" from "Papers"'.format(fts))
 	for rec in cur.fetchall():
 		# Update record.
 		bibtex = rec[-1]
@@ -88,7 +88,7 @@ def update_fields():
 			be = bd.entries[0]
 
 
-			title = be['title'].replace('{', '').replace('}', '')
+			title = be["Title"].replace('{', '').replace('}', '')
 			print('\nUpdating: ', title)
 			for (i, d, b) in fields_table:
 				is_title = i == title_idx
@@ -114,8 +114,8 @@ def update_fields():
 						print(d, ': ', rec[i], ' -> ', field)
 
 						cur.execute(
-							"update `Papers` set `{0}`=? "
-								"where `BibTeX`=?".format(d), 
+							'update "Papers" set "{0}"=? '
+								'where "BibTeX"=?'.format(d), 
 							(field, bibtex)
 						)
 				elif field_empty_in_db and not field_in_bibtex:
@@ -129,8 +129,8 @@ def update_fields():
 				old_title = rec[title_idx]
 				
 				cur.execute(
-					"update `Papers` set `Title`=? "
-						"where `Title`=?".format(d), 
+					'update "Papers" set "Title"=? '
+						'where "Title"=?'.format(d), 
 					(new_title, old_title)
 				)
 

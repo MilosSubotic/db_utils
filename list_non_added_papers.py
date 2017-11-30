@@ -29,11 +29,11 @@ from os.path import join
 ###############################################################################
 
 exts = ['.pdf', '.html', '.ps', '.ps.gz']
-#search_dirs = ["Papers", "Numeric", "Books"]
-search_dirs = ["Papers", "Books"]
+#search_dirs = ['Papers', 'Numeric', 'Books']
+search_dirs = ['Papers', 'Books']
 #TODO .dbignore
 ignores = [
-	"Papers/home.cc.umanitoba.ca_EMILab"
+	'Papers/home.cc.umanitoba.ca_EMILab'
 ]
 
 ###############################################################################
@@ -56,7 +56,7 @@ def list_non_added_papers():
 	
 	con = sqlite3.connect(db_file)
 	cur = con.cursor()
-	cur.execute("select `File` from `Papers`")
+	cur.execute('select "File" from "Papers"')
 	files_in_db = [t[0] for t in cur.fetchall()]
 	con.close()
 	

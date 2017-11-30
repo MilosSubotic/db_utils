@@ -33,13 +33,13 @@ def add_file_to_db(src):
 	title_field = os.path.splitext(f)[0]
 	file_field = join(d, f)
 	
-	print('`Title` = ', title_field)
-	print('`File` = ', file_field)
+	print('"Title" = ', title_field)
+	print('"File" = ', file_field)
 	
 	con = sqlite3.connect(db_file)
 	cur = con.cursor()
 
-	cur.execute("select `Title` from `Papers`")
+	cur.execute('select "Title" from "Papers"')
 	titles = [ t[0] for t in cur.fetchall()]
 	
 	already_exists = False
@@ -52,12 +52,12 @@ def add_file_to_db(src):
 	
 	if already_exists:
 		cur.execute(
-			"update `Papers` set `File`=? where `Title`=?", 
+			'update "Papers" set "File"=? where "Title"=?', 
 			(file_field, title_field)
 		)
 	else:
 		cur.execute(
-			"insert into `Papers` (`File`, `Title`) values (?, ?)",
+			'insert into "Papers" ("File", "Title") values (?, ?)',
 			(file_field, title_field)
 		)
 	
