@@ -2,7 +2,7 @@
 -- Copy FDTD Subgridding rows to Subgridding table
 insert into Subgridding (Title)
 	select Title from Papers 
-		where Why_interesting = "Subgridding" and Title not in (
+		where Why_interesting = 'Subgridding' and Title not in (
 			select Title from Subgridding
 		);
 
@@ -21,6 +21,6 @@ create table Papers2 as select * from Papers;
 -- Clear table.
 delete from Papers;
 -- Extract something.
-insert into Papers select * from Papers2 where Subject_Field = "Tesla turbine";
-insert into Papers select * from Papers2 where Subject_Field = "Hydrostatic transmission";
+insert into Papers select * from Papers2 where Subject_Field = 'Tesla turbine';
+insert into Papers select * from Papers2 where Subject_Field = 'Hydrostatic transmission';
 drop table Papers2;

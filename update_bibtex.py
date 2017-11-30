@@ -192,7 +192,7 @@ def update_bibtex_string(i, bs1):
 		print(r2.url)
 		return bs1
 	
-	bs2 = r2.content.decode("utf-8")
+	bs2 = r2.content.decode('utf-8')
 	bd2t = bib.loads(bs2, create_parser())
 	
 	bd2 = BibDatabase()
@@ -283,7 +283,7 @@ def create_bibtex_string(i, title):
 		print(r2.url)
 		return None
 	
-	bs2 = r2.content.decode("utf-8")
+	bs2 = r2.content.decode('utf-8')
 	bd2t = bib.loads(bs2, create_parser())
 	
 	bd2 = BibDatabase()

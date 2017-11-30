@@ -29,11 +29,11 @@ from os.path import join
 ###############################################################################
 
 exts = ['.pdf', '.html', '.ps', '.ps.gz']
-#search_dirs = ["Papers", "Numeric", "Books"]
-search_dirs = ["Papers", "Books"]
+#search_dirs = ['Papers', 'Numeric', 'Books']
+search_dirs = ['Papers', 'Books']
 #TODO .dbignore
 ignores = [
-	"Papers/home.cc.umanitoba.ca_EMILab"
+	'Papers/home.cc.umanitoba.ca_EMILab'
 ]
 
 ###############################################################################
