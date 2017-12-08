@@ -8,6 +8,8 @@ Create/update `BibTeX` in database with crossref.org online version.
 Counting start from 1.
 '''
 
+#TODO Remove \textquotesingle from others fields too.
+
 ###############################################################################
 
 from __future__ import print_function
@@ -38,12 +40,32 @@ titles_to_ignore = [
 	'Adaptive Coordinate Descent'
 ]
 special_words = [
-	'2D', '3D', 'FDTD', '(FDTD)', 'EC', '(EC)', 'openEMS', 'openEMS--a',
-	'GHz', 'TM', 'TE', 'GA', 'PSO', 'FPGA', 'Lorentzian', 'Debye', 'Born',
-	'CMA-ES', '(CMA-ES)'
+	'2D', '2-D', '3D', '3-D', 'FDTD', '(FDTD)',
+	'EC', '(EC)', 'openEMS', 'openEMS--a',
+	'FPGA', 'GPU',
+	'GHz', 'TM', 'TE', 'GA', 'PSO', 'Lorentzian', 'Debye', 'Born',
+	'CMA-ES', '(CMA-ES)',
+	'PML', '(CPML):', 'CFS-PML',
+	'EMC/EMI', 'GPR'
 ]
 
 ###############################################################################
+
+def parse_version(s):
+	a = s.split('.')
+	a = map(int, a)
+	N = len(a)
+	a = [v<<8*(N-1-i) for i, v in enumerate(a)]
+	n = reduce(lambda x, y: x|y, a)
+	#print(hex(n))
+	return n
+
+def get_json_from_request(r):
+	#TODO Check version on old Debian.
+	if parse_version(requests.__version__) >= parse_version('2.2.1'):
+		return r.json()
+	else:
+		return r.json
 
 def create_parser():
 	parser = BibTexParser()
@@ -102,13 +124,13 @@ def preserve_special_words(s):
 		w.append(t)
 	s = ' '.join(w)
 	return s
-	
+
 def correct_author(t):
 	return titlize(t).replace(' And ', ' and ')\
 		.replace('Van Den Berg', 'van den Berg')\
 		.replace(u'ö', '{\\"o}')\
 		.replace(u'ü', '{\\"u}')\
-		
+
 
 def correct_title(t):
 	t = t.replace(r'&#x2013;', '--')\
@@ -120,41 +142,46 @@ def correct_title(t):
 		.replace(r"{'}", "'")
 	t = t.replace(r'`` ', '')\
 		.replace(r"''", '')
+	t = t.replace(r'<title>', '')\
+		.replace(r'</title>', '')\
+		.replace(r'$\less$title$\greater$', '')\
+		.replace(r'$\less$/title$\greater$', '')
+
 
 	#TODO Correct upcase titles.
 	t = t.replace('{', '').replace('}', '')
-	
+
 	t =  titlize(t)
 
 	t = preserve_special_words(t)
-	
+
 	return t
 
 def prep_title(t):
 	return correct_title(t.lower().replace('{', '').replace('}', ''))
-			
+
 def eq_titles(t1, t2):
 	return prep_title(t1) == prep_title(t2)
 
 def update_bibtex_string(i, bs1):
 	# Update existing BibTeX.
 	assert bs1
-	
+
 	bd1 = bib.loads(bs1, create_parser())
 	if len(bd1.entries) == 0:
 		# Cannot parse BibTeX.
 		return bs1
 
 	title = bd1.entries[0]['title']
-	
+
 	if correct_title(title) in titles_to_ignore:
 		return bs1
-	
+
 	def intro():
 		print()
 		print(i, ' update:')
 		print(title)
-	
+
 	#params = {'query.title' : title, 'rows': '1'}
 	params = {'query' : title, 'rows': '10'}
 	r1 = requests.get('http://api.crossref.org/works', params=params)
@@ -163,8 +190,8 @@ def update_bibtex_string(i, bs1):
 		print(r1.status_code)
 		print(r1.url)
 		return bs1
-	
-	a = r1.json
+
+	a = get_json_from_request(r1)
 	assert a['status'] == 'ok'
 
 	doi = None
@@ -181,9 +208,9 @@ def update_bibtex_string(i, bs1):
 		print(a['message']['items'][0]['title'][0])
 		print(r1.url)
 		return bs1
-			
+
 	r2 = requests.get(
-		'http://api.crossref.org/works/' + doi + 
+		'http://api.crossref.org/works/' + doi +
 		'/transform/application/x-bibtex'
 	)
 	if r2.status_code != 200:
@@ -191,16 +218,16 @@ def update_bibtex_string(i, bs1):
 		print(r2.status_code)
 		print(r2.url)
 		return bs1
-	
+
 	bs2 = r2.content.decode('utf-8')
 	bd2t = bib.loads(bs2, create_parser())
-	
+
 	bd2 = BibDatabase()
 	bd2.entries = [bd2t.entries[0]]
 	b1 = bd1.entries[0]
 	b2 = bd2.entries[0]
 
-	
+
 	if 'title' not in b2:
 		intro()
 		print('Strange results!')
@@ -208,44 +235,44 @@ def update_bibtex_string(i, bs1):
 		print(r1.url)
 		print(r2.url)
 		return bs1
-	
+
 	b2['ID'] = b1['ID']
-	
+
 	b2['title'] = correct_title(b2['title'])
 	b2['author'] = correct_author(b2['author'])
-	
+
 	link_to_url(b1)
 	link_to_url(b2)
 	if 'url' in b1:
 		b2['url'] = b1['url']
 	else:
 		b2['url'] = b2['url'].replace('%2F', '/')
-	
+
 	if b1 == b2:
 		# Nothing new.
 		return bs1
 
 	intro()
 	diff_bibs(b1, b2)
-	
+
 	bw = BibTexWriter()
 	bw.indent = '  '
 	bs2 = bw.write(bd2)
-		
+
 	return bs2
 
 
 def create_bibtex_string(i, title):
 	# Download new BibTeX.
-	
+
 	if correct_title(title) in titles_to_ignore:
 		return None
-	
+
 	def intro():
 		print()
 		print(i, ' create:')
 		print(title)
-	
+
 	#params = {'query.title' : title, 'rows': '1'}
 	params = {'query' : title, 'rows': '10'}
 	r1 = requests.get('http://api.crossref.org/works', params=params)
@@ -254,8 +281,8 @@ def create_bibtex_string(i, title):
 		print(r1.status_code)
 		print(r1.url)
 		return None
-	
-	a = r1.json
+
+	a = get_json_from_request(r1)
 	assert a['status'] == 'ok'
 
 	doi = None
@@ -272,9 +299,9 @@ def create_bibtex_string(i, title):
 		print(a['message']['items'][0]['title'][0])
 		print(r1.url)
 		return None
-			
+
 	r2 = requests.get(
-		'http://api.crossref.org/works/' + doi + 
+		'http://api.crossref.org/works/' + doi +
 		'/transform/application/x-bibtex'
 	)
 	if r2.status_code != 200:
@@ -282,15 +309,15 @@ def create_bibtex_string(i, title):
 		print(r2.status_code)
 		print(r2.url)
 		return None
-	
+
 	bs2 = r2.content.decode('utf-8')
 	bd2t = bib.loads(bs2, create_parser())
-	
+
 	bd2 = BibDatabase()
 	bd2.entries = [bd2t.entries[0]]
 	b2 = bd2.entries[0]
 
-	
+
 	if 'title' not in b2:
 		intro()
 		print('Strange results!')
@@ -298,44 +325,44 @@ def create_bibtex_string(i, title):
 		print(r1.url)
 		print(r2.url)
 		return None
-	
+
 	b2['ID'] = 'TODO_' + b2['ID']
-	
+
 	b2['title'] = correct_title(b2['title'])
 	if 'author' in b2:
 		b2['author'] = correct_author(b2['author'])
 	else:
 		b2['author'] = 'TODO'
-	
+
 	link_to_url(b2)
 	if 'url' in b2:
 		b2['url'] = b2['url'].replace('%2F', '/')
 	else:
 		b2['url'] = 'TODO'
-	
+
 	intro()
 	for (k, v) in b2.items():
 		print('Added: ', k, ' = ', v)
-	
+
 	bw = BibTexWriter()
 	bw.indent = '  '
 	bs2 = bw.write(bd2)
-	
+
 	return bs2
 
 
-	
+
 def update_bibtex_range(range_start, range_end):
 	print('Creating/updating BibTeX in DB file: ', db_file)
-	
+
 	con = sqlite3.connect(db_file)
 	cur = con.cursor()
-	
+
 	cur.execute("select `Title`, `BibTeX` from `Papers`")
 	t1 = cur.fetchall()
 	titles = [tt[0] for tt in t1]
 	bibtexes = [tt[1] for tt in t1]
-	
+
 	# Search range.
 	def entry_to_idx(entry):
 		i = int(entry)
@@ -343,29 +370,29 @@ def update_bibtex_range(range_start, range_end):
 			error('Index ', i, ' is out of range for DB!')
 		idx = i-1
 		return idx
-	
+
 	print('In range: [', range_start, ', ', range_end, '] (closed interval)')
-	
+
 	start_idx = entry_to_idx(range_start)
 	end_idx = entry_to_idx(range_end)
 	r = range(start_idx, end_idx+1)
-	
+
 	for idx in r:
 		i = idx+1
 		if bibtexes[idx]:
 			bibtexes[idx] = update_bibtex_string(i, bibtexes[idx])
 		else:
 			bibtexes[idx] = create_bibtex_string(i, titles[idx])
-	
+
 	for i in r:
 		cur.execute(
 			"update `Papers` set `BibTeX`=? where `Title`=?",
 			(bibtexes[i], titles[i])
 		)
-		
+
 	con.commit()
 	con.close()
-	
+
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(
@@ -386,7 +413,7 @@ if __name__ == '__main__':
 		help = 'range end including this one'
 	)
 	args = parser.parse_args()
-	
+
 	if args.range_end:
 		update_bibtex_range(
 			args.entry_or_range_start[0],
@@ -399,4 +426,3 @@ if __name__ == '__main__':
 		)
 
 ###############################################################################
-
