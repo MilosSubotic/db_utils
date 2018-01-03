@@ -35,7 +35,8 @@ from bibtexparser.bparser import BibTexParser
 db_to_bib_fields = {
 	'Title' : ['title'],
 	'Journal_Conference_Other_Source' : ['journal', 'booktitle'],
-	'Year' : ['year']
+	'Year' : ['year'],
+	'BibTeX_ID' : ['ID']
 }
 
 ###############################################################################
