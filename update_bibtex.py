@@ -1,7 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#FIXME For now work with python2,
-# because python 3.2 cannot use bibtexparser.
 
 '''
 Create/update `BibTeX` in database with crossref.org online version.

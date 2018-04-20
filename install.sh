@@ -1,4 +1,3 @@
 #!/bin/bash
 
-pip3 install bibtexparser
-pip3 install requests
+sudo apt install python3 python3-bibtexparser python3-requests

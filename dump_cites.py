@@ -1,7 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#FIXME For now work with python2,
-# because python 3.2 cannot use bibtexparser.
 
 '''
 Dump all non-empty, non-TODO `BibTeX` fields to 'cites.bib' file.
@@ -79,4 +77,3 @@ if __name__ == '__main__':
 	dump_cites()
 
 ###############################################################################
-

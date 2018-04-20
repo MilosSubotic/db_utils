@@ -1,7 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#FIXME For now work with python2,
-# because python 3.2 cannot use bibtexparser.
 
 '''
 From `BibTeX` update other fields: `Title`, `Journal`, `Year`...
@@ -150,4 +148,3 @@ if __name__ == '__main__':
 	update_fields()
 	
 ###############################################################################
-
