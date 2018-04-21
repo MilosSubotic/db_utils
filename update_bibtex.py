@@ -51,10 +51,12 @@ special_words = [
 
 def parse_version(s):
 	a = s.split('.')
-	a = map(int, a)
 	N = len(a)
+	a = [int(aa) for aa in a]
 	a = [v<<8*(N-1-i) for i, v in enumerate(a)]
-	n = reduce(lambda x, y: x|y, a)
+	n = 0
+	for aa in a:
+		n |= aa
 	#print(hex(n))
 	return n
 
