@@ -10,7 +10,7 @@
 D="${@: -1}"
 while true;
 do
-	FIND_RES=$(find "$D" -maxdepth 1 -type f -name *.sqlite)
+	FIND_RES=$(find -L "$D" -maxdepth 1 -type f -name *.sqlite)
 	if test "$FIND_RES" != ""
 	then
 		break
@@ -23,6 +23,7 @@ do
 	fi
 	
 	D=$(dirname "$D")
+	echo $D
 done
 
 pushd "$D" 1>/dev/null
@@ -33,4 +34,3 @@ popd 1>/dev/null
 exit $R
 
 ###############################################################################
-
