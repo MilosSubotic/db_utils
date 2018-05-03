@@ -94,7 +94,7 @@ def update_fields():
 				field_empty_in_db = not rec[i]
 				field_in_bibtex = None
 				for bb in b:
-					if be.has_key(bb):
+					if bb in be:
 						field_in_bibtex = bb
 						break
 					
