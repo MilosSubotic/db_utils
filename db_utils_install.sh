@@ -1,11 +1,15 @@
 #!/bin/bash
 
+# For scripts.
 sudo apt install python3 python3-bibtexparser python3-requests
 
 # DB Browser for SQLite
+sudo apt install git build-essential cmake libqt4-dev libsqlite3-dev
 git clone https://github.com/MilosSubotic/sqlitebrowser
+pushd sqlitebrowser
 git checkout file_name_stuff
-sudo apt install build-essential cmake libqt4-dev libsqlite3-dev
 cmake .
-make
+make -j4
 sudo make install
+popd
+
