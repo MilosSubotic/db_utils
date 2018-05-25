@@ -48,7 +48,7 @@ def fill_db(src, dst):
 			if ws in ['google.com']:
 				where_searched_field = ws
 				search_keywords_field = ' - '.join(s[0:-1])
-	elif reason == 'ref':
+	elif reason == 'ref' or reason == 'refs':
 		reference_from_field = d1
 	else:
 		reason = None
@@ -164,4 +164,3 @@ if __name__ == '__main__':
 	move_files(args.src, args.dst[0])
 
 ###############################################################################
-
