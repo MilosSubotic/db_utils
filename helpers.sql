@@ -39,3 +39,35 @@ insert into Papers select * from Papers2 where `Subject_Field` = 'Tesla turbine'
 insert into Papers select * from Papers2 where `Subject_Field` = 'Hydrostatic transmission';
 drop table Papers2;
 
+-- Replace
+update Papers
+	set `Journal_Conference_Other_Source` = 'IEEE Transactions on Antennas and Propagation'
+	where `Journal_Conference_Other_Source` = 'Antennas and Propagation, IEEE Transactions on';
+
+-- Collect journals.
+insert into Journals (Name)
+	select distinct `Journal_Conference_Other_Source` from Papers 
+		where 
+			not (
+				`Journal_Conference_Other_Source` like '%Conference%' or
+				`Journal_Conference_Other_Source` like '%Workshop%' or
+				`Journal_Conference_Other_Source` like '%Symposium%' or
+				`Journal_Conference_Other_Source` like '%Colloquium%' or
+				`Journal_Conference_Other_Source` like '%Forum%' or
+				`Journal_Conference_Other_Source` like '%Proc.%' or
+				`Journal_Conference_Other_Source` like '%Book%' or
+				`Journal_Conference_Other_Source` like '%PhD%' or
+				`Journal_Conference_Other_Source` like '%MSc%' or
+				`Journal_Conference_Other_Source` like '%BSc%' or
+				`Journal_Conference_Other_Source` like '%Article%' or
+				`Journal_Conference_Other_Source` like '%Tutorial%' or
+				`Journal_Conference_Other_Source` like '%Technical Report%' or
+				`Journal_Conference_Other_Source` like '%Standard%' or
+				`Journal_Conference_Other_Source` like '%Site%' or
+				`Journal_Conference_Other_Source` like '%Source code%' or
+				`Journal_Conference_Other_Source` = ''
+			) and
+			--`Journal_Conference_Other_Source` like '%IEEE%' and
+			`Journal_Conference_Other_Source` not in (
+				select `Name` from Journals
+			);
