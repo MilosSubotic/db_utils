@@ -23,7 +23,7 @@ create table Probe (
 insert into Probe (`Title`)
 	select `Title` from Papers 
 		where 
-			`Subject_Field` like '%Probe%' and 
+			`Subject_field` like '%Probe%' and 
 			`Title` not in (select `Title` from Probe);
 create view Probe_Papers as
 	select Probe.*, Papers.*
@@ -35,8 +35,8 @@ create table Papers2 as select * from Papers;
 -- Clear table.
 delete from Papers;
 -- Extract something.
-insert into Papers select * from Papers2 where `Subject_Field` = 'Tesla turbine';
-insert into Papers select * from Papers2 where `Subject_Field` = 'Hydrostatic transmission';
+insert into Papers select * from Papers2 where `Subject_field` = 'Tesla turbine';
+insert into Papers select * from Papers2 where `Subject_field` = 'Hydrostatic transmission';
 drop table Papers2;
 
 -- Replace
@@ -71,3 +71,11 @@ insert into Journals (Name)
 			`Journal_Conference_Other_Source` not in (
 				select `Name` from Journals
 			);
+
+-- Update count.
+update Journals
+	set `Count_of_papers` = (
+		select count(`Index`)
+			from Papers
+			where `Journal_Conference_Other_Source` = Journals.`Name`
+	);
