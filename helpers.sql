@@ -79,3 +79,13 @@ update Journals
 			from Papers
 			where `Journal_Conference_Other_Source` = Journals.`Name`
 	);
+
+-- String operations on specific cells.
+update Papers 
+	set `File` = replace(`File`, 'RF/Probes/', 'RF/Tools/Probes/')
+	where `File` like 'RF/Probes/%';
+-- Check it.
+select * from Papers 
+	where `File` like 'RF/Probes/%';
+select * from Papers 
+	where `File` like 'RF/Tools/Probes/%';
