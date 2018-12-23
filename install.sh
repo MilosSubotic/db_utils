@@ -13,3 +13,4 @@ make -j4
 sudo make install
 popd
 
+echo 'export PATH=$PATH:$HOME/ELEKTRONIKA/A_PROGRAM_CODE/Utils/db_utils/source' >> ~/.profile
