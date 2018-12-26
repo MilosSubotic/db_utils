@@ -34,33 +34,36 @@ def fill_db(src, dst):
 	file_field = join(d, f)
 	splited_src_dir = dirname(src).split('/')
 	
-	where_searched_field = None
-	search_keywords_field = None
-	reference_from_field = None
+	fields = {
+		'`File`'             : file_field,
+		'`Where_searched`'   : None,
+		'`Search_keywords`'  : None,
+		'`Reference_from`'   : None,
+		'`Because_it_cited`' : None
+	}
+	because_it_cited_field = None
 	reason = splited_src_dir[-2]
 	d1 = splited_src_dir[-1]
 	if reason == 'kw':
 		s = d1.split(' - ')
-		search_keywords_field = d1
-		where_searched_field = 'Google Scholar'
+		fields['`Search_keywords`'] = d1
+		fields['`Where_searched`'] = 'Google Scholar'
 		if len(s) >= 2:
 			ws = s[-1]
 			if ws in ['google.com']:
-				where_searched_field = ws
-				search_keywords_field = ' - '.join(s[0:-1])
+				fields['`Where_searched`'] = ws
+				fields['`Search_keywords`'] = ' - '.join(s[0:-1])
 	elif reason == 'ref' or reason == 'refs':
-		reference_from_field = d1
+		fields['`Reference_from`'] = d1
+	elif reason == 'cites':
+		fields['`Because_it_cited`'] = d1
 	else:
 		reason = None
 	
 	print('`Title` = ', title_field)
-	print('`File` = ', file_field)
-	if where_searched_field:
-		print('`Where_searched` = ', where_searched_field)
-	if search_keywords_field:
-		print('`Search_keywords` = ', search_keywords_field)
-	if reference_from_field:
-		print('`Reference_from` = ', reference_from_field)
+	for field_name, field_value in fields.items():
+		if field_value:
+			print('`{0}` = {1}'.format(field_name, field_value))
 	
 	con = sqlite3.connect(db_file)
 	cur = con.cursor()
@@ -79,37 +82,43 @@ def fill_db(src, dst):
 	
 	if already_exists:
 		# If there is no new value for field, use that alredy in table.
-		if not where_searched_field:
-			cur.execute(
-				"select `Where_searched` from `Papers` where `Title`=?",
-				(title_field,)
-			)
-			where_searched_field = cur.fetchall()[0][0]
-		if not search_keywords_field:
-			cur.execute(
-				"select `Search_keywords` from `Papers` where `Title`=?",
-				(title_field,)
-			)
-			search_keywords_field = cur.fetchall()[0][0]
-		if not reference_from_field:
-			cur.execute(
-				"select `Reference_from` from `Papers` where `Title`=?",
-				(title_field,)
-			)
-			reference_from_field = cur.fetchall()[0][0]
+		
+		for field_name in fields.keys():
+			if not fields[field_name]:
+				cur.execute(
+					"select `{0}` from `Papers` where `Title`=?".format(
+						field_name
+					),
+					(title_field,)
+				)
+				fields[field_name] = cur.fetchall()[0][0]
+		
+		query = "update `Papers` set "
+		l = []
+		for field_name, field_value in fields.items():
+			query += field_name + "=?, "
+			l.append(field_value)
+		query += "where `Title`=?"
+		l.append(title_field)
+		
 		cur.execute(
-			"update `Papers` set `File`=?, `Where_searched`=?, "\
-				"`Search_keywords`=?, `Reference_from`=? where `Title`=?", 
-			(file_field, where_searched_field, search_keywords_field, 
-				reference_from_field, title_field)
+			query,
+			tuple(l)
 		)
 	else:
+		query = "insert into `Papers` ("
+		l = []
+		for field_name, field_value in fields.items():
+			query += field_name + ", "
+			l.append(field_value)
+		query += "`Title`) values ("
+		query += '?, ' * len(fields)
+		query += "?)"
+		l.append(title_field)
+		
 		cur.execute(
-			"insert into `Papers` (`File`, `Where_searched`, "\
-				"`Search_keywords`, `Reference_from`, `Title`)"\
-				" values (?, ?, ?, ?, ?)", 
-			(file_field, where_searched_field, search_keywords_field, 
-				reference_from_field, title_field)
+			query,
+			tuple(l)
 		)
 	
 	con.commit()
