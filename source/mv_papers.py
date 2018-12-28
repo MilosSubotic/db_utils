@@ -63,7 +63,7 @@ def fill_db(src, dst):
 	print('`Title` = ', title_field)
 	for field_name, field_value in fields.items():
 		if field_value:
-			print('`{0}` = {1}'.format(field_name, field_value))
+			print(field_name, ' = ', field_value)
 	
 	con = sqlite3.connect(db_file)
 	cur = con.cursor()
@@ -86,7 +86,7 @@ def fill_db(src, dst):
 		for field_name in fields.keys():
 			if not fields[field_name]:
 				cur.execute(
-					"select `{0}` from `Papers` where `Title`=?".format(
+					"select {0} from `Papers` where `Title`=?".format(
 						field_name
 					),
 					(title_field,)
@@ -98,7 +98,8 @@ def fill_db(src, dst):
 		for field_name, field_value in fields.items():
 			query += field_name + "=?, "
 			l.append(field_value)
-		query += "where `Title`=?"
+		query= query[:-2] # Remove trailing ', '.
+		query += " where `Title`=?"
 		l.append(title_field)
 		
 		cur.execute(
