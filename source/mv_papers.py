@@ -27,10 +27,29 @@ from os.path import join, dirname, relpath, basename
 
 ###############################################################################
 
+def file_name_to_title_field(file_name):
+	title_field = file_name
+	def warn_about(fn_code):
+		if fn_code in file_name:
+			warn('Has "', fn_code, '" in file name.')
+	
+	warn_about('<')
+	warn_about('>')
+	title_field = title_field.replace('..', ':')
+	title_field = title_field.replace('\'\'', '\"')
+	title_field = title_field.replace('~~', '/')
+	warn_about('~')
+	warn_about('\\')
+	warn_about('|')
+	warn_about('?')
+	warn_about('*')
+	
+	return title_field
+
 def fill_db(src, dst):
 	d = relpath(dst, root_dir)
 	f = basename(src)
-	title_field = os.path.splitext(f)[0]
+	title_field = file_name_to_title_field(os.path.splitext(f)[0])
 	file_field = join(d, f)
 	splited_src_dir = dirname(src).split('/')
 	
@@ -72,14 +91,11 @@ def fill_db(src, dst):
 	cur.execute("select `Title` from `Papers`")
 	titles = [ t[0] for t in cur.fetchall()]
 	
-	already_exists = False
-	for t in titles:
-		t2 = t.replace(':', ' -').replace('/', '~')
-		if t2 == title_field:
-			title_field = t
-			already_exists = True
-			break
-
+	has_title = [t == title_field for t in titles]
+	already_exists = any(has_title)
+	if sum(has_title) > 1:
+		warn('Have multiple similar titles in database.')
+	
 	
 	if already_exists:
 		# If there is no new value for field, use that alredy in table.

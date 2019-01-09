@@ -1,3 +1,13 @@
+- Forbidden Characters:
+	< (less than)
+	> (greater than)
+	: (colon - sometimes works, but is actually NTFS Alternate Data Streams) - ..
+	" (double quote) - ''
+	/ (forward slash) - ~~
+	\ (backslash)
+	| (vertical bar or pipe)
+	? (question mark) - 
+	* (asterisk)
 
 - SQLite DB field groups by source:
 	- BibTeX related:
@@ -114,5 +124,3 @@
 		+ Parse `BibTeX`
 		+ Update `BibTeX` with online version
 		+ Check BibTeX related fields
-
-
