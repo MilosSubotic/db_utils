@@ -45,14 +45,15 @@ def fill_db(src, dst):
 	reason = splited_src_dir[-2]
 	d1 = splited_src_dir[-1]
 	if reason == 'kw':
-		s = d1.split(' - ')
 		fields['`Search_keywords`'] = d1
 		fields['`Where_searched`'] = 'Google Scholar'
+		s = d1.split(' - ')
 		if len(s) >= 2:
 			ws = s[-1]
-			if ws in ['google.com']:
+			sk = ' - '.join(s[0:-1])
+			if ws in ['google.com', 'Wiki']:
 				fields['`Where_searched`'] = ws
-				fields['`Search_keywords`'] = ' - '.join(s[0:-1])
+				fields['`Search_keywords`'] = sk
 	elif reason == 'ref' or reason == 'refs':
 		fields['`Reference_from`'] = d1
 	elif reason == 'cites':
