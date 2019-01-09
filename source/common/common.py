@@ -57,10 +57,12 @@ def debug(var):
 			break
 	print('{0} = {1}'.format(varName, var))
 
+def error(*args, **kwargs):
+	print('WARN: ', *args, file = sys.stderr, **kwargs)
 
 def error(*args, **kwargs):
-    print(*args, file = sys.stderr, **kwargs)
-    sys.exit(1)
+	print('ERROR: ', *args, file = sys.stderr, **kwargs)
+	sys.exit(1)
 
 
 def correct_path(path):
@@ -92,4 +94,3 @@ def recursive_glob(pattern, directory = '.'):
 	return found
 
 ###############################################################################
-
