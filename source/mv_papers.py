@@ -23,7 +23,7 @@ import sqlite3
 import argparse
 from common.common import *
 
-from os.path import join, dirname, relpath, basename
+from os.path import join, dirname, basename, relpath, isdir
 
 ###############################################################################
 
@@ -158,7 +158,29 @@ def move_from_hunt_to_tree(src, dst):
 	
 	fill_db(src, dst)
 
-def move_files(src, dst):
+def move_file(src, dst):
+	move_from_hunt_to_tree(src, dst)
+
+def move_dir(src, dst):
+	src_root = os.path.normpath(join(src, '..'))
+	# Move files.
+	for root, dirs, files in os.walk(src):
+		rel_root = relpath(root, src_root)
+		dst_dir = join(dst, rel_root)
+		if not isdir(dst_dir):
+			os.mkdir(dst_dir)
+		for f in files:
+			src_file = join(root, f)
+			move_file(src_file, dst_dir)
+	
+	# Check are dirs empty.
+	for root, dirs, files in os.walk(src):
+		assert(len(files) == 0)
+		
+	# Remove empty dirs.
+	shutil.rmtree(src)
+
+def move_glob(src, dst):
 	srcs = []
 	for s in src:
 		srcs += glob.glob(s)
@@ -166,7 +188,10 @@ def move_files(src, dst):
 		print('Nothing to move from source: ', src)
 	else:
 		for s in srcs:
-			move_from_hunt_to_tree(s, dst)
+			if isdir(s):
+				move_dir(s, dst)
+			else:
+				move_file(s, dst)
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(
@@ -177,7 +202,7 @@ if __name__ == '__main__':
 		metavar = 'src',
 		type = str,
 		nargs = '+',
-		help = 'source files'
+		help = 'source files/directories'
 	)
 	parser.add_argument(
 		'dst',
@@ -188,6 +213,6 @@ if __name__ == '__main__':
 	)
 	args = parser.parse_args()
 	
-	move_files(args.src, args.dst[0])
+	move_glob(args.src, args.dst[0])
 
 ###############################################################################
