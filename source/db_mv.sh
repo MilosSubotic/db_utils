@@ -23,7 +23,7 @@ do
 	fi
 	
 	D=$(dirname "$D")
-	echo $D
+	#echo $D
 done
 
 pushd "$D" 1>/dev/null
