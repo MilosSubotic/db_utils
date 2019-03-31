@@ -32,13 +32,17 @@ def file_name_to_title_field(file_name):
 	def warn_about(fn_code):
 		if fn_code in file_name:
 			warn('Has "', fn_code, '" in file name.')
+	def warn_about2(fn_code):
+		fn_code2 = fn_code + fn_code
+		if fn_code in file_name and not (fn_code2 in file_name):
+			warn('Has "', fn_code, '" in file name.')
 	
 	warn_about('<')
 	warn_about('>')
 	title_field = title_field.replace('..', ':')
 	title_field = title_field.replace('\'\'', '\"')
 	title_field = title_field.replace('~~', '/')
-	warn_about('~')
+	warn_about2('~')
 	warn_about('\\')
 	warn_about('|')
 	warn_about('?')

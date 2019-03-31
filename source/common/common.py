@@ -57,7 +57,7 @@ def debug(var):
 			break
 	print('{0} = {1}'.format(varName, var))
 
-def error(*args, **kwargs):
+def warn(*args, **kwargs):
 	print('WARN: ', *args, file = sys.stderr, **kwargs)
 
 def error(*args, **kwargs):
