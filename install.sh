@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Add to PATH.
+D="$( cd "$( dirname "${BASH_SOURCE[0]}" )/source" >/dev/null 2>&1 && pwd )"
+echo "export PATH=\$PATH:$D" >> ~/.profile
+
+
 # For scripts.
 sudo apt install python3 python3-bibtexparser python3-requests
 
@@ -12,5 +17,3 @@ cmake .
 make -j4
 sudo make install
 popd
-
-echo 'export PATH=$PATH:$HOME/ELEKTRONIKA/A_PROGRAM_CODE/Utils/db_utils/source' >> ~/.profile
