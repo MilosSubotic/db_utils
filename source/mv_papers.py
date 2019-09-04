@@ -83,12 +83,7 @@ def fill_db(src, dst):
 		fields['`Because_it_cited`'] = d1
 	else:
 		reason = None
-	
-	print('`Title` = ', title_field)
-	for field_name, field_value in fields.items():
-		if field_value:
-			print(field_name, ' = ', field_value)
-	
+
 	con = sqlite3.connect(db_file)
 	cur = con.cursor()
 
@@ -100,6 +95,15 @@ def fill_db(src, dst):
 	if sum(has_title) > 1:
 		warn('Have multiple similar titles in database.')
 	
+	# Set index.
+	if not already_exists:
+		index_field = len(titles)+1
+		fields['`Index`'] = index_field
+	
+	print('`Title` = ', title_field)
+	for field_name, field_value in fields.items():
+		if field_value:
+			print(field_name, ' = ', field_value)
 	
 	if already_exists:
 		# If there is no new value for field, use that alredy in table.
@@ -142,6 +146,7 @@ def fill_db(src, dst):
 			query,
 			tuple(l)
 		)
+		
 	
 	con.commit()
 	con.close()
