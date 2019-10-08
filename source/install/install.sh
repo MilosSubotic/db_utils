@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Add to PATH.
-D="$( cd "$( dirname "${BASH_SOURCE[0]}" )/source" >/dev/null 2>&1 && pwd )"
-echo "export PATH=\$PATH:$D" >> ~/.profile
+D="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../" >/dev/null 2>&1 && pwd )"
+echo "export PATH=\$PATH:$D" >> ~/.bashrc
 
 
 # For scripts.
