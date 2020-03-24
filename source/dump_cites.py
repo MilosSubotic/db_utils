@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 '''
-Dump all non-empty, non-TODO `BibTeX` fields to 'cites.bib' file.
+Dump all non-empty, non-TODO `BibTeX` fields to 'Cites.bib' file.
 '''
 
 ###############################################################################
@@ -25,7 +25,7 @@ from bibtexparser.bparser import BibTexParser
 
 ###############################################################################
 
-cites_bib_file = 'cites.bib'
+cites_bib_file = 'Cites.bib'
 
 ###############################################################################
 
