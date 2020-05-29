@@ -19,6 +19,7 @@ import os
 import sys
 import shutil
 import glob
+import subprocess
 import sqlite3
 import argparse
 from common.common import *
@@ -191,8 +192,18 @@ def move_dir(src, dst):
 
 def move_glob(src, dst):
 	srcs = []
+	debug(src)
 	for s in src:
-		srcs += glob.glob(s)
+		# Escapaping [ and ].
+		e = ''
+		for c in s:
+			if c == '[':
+				e += '[[]'
+			elif c == ']':
+				e += '[]]'
+			else:
+				e += c
+		srcs += glob.glob(e)
 	if len(srcs) == 0:
 		print('Nothing to move from source: ', src)
 	else:
