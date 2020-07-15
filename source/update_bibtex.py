@@ -35,6 +35,9 @@ from colorama import Fore, Style
 
 ###############################################################################
 
+POSSIBLE_TITLES_PRINT_NUM = 1
+
+#TODO Nicer
 titles_to_ignore = [
 	'A Frequency-hopping Approach For Microwave Imaging Of Large Inhomogeneous Bodies',
 	'Adaptive Coordinate Descent'
@@ -48,8 +51,6 @@ special_words = [
 	'PML', '(CPML):', 'CFS-PML',
 	'EMC/EMI', 'GPR'
 ]
-
-POSSIBLE_TITLES_PRINT_NUM = 1
 
 ###############################################################################
 
@@ -167,7 +168,7 @@ def prep_title(t):
 def eq_titles(t1, t2):
 	return prep_title(t1) == prep_title(t2)
 
-def update_bibtex_string(i, bs1):
+def update_bibtex_string(ignore_miss, i, bs1, bid1):
 	# Update existing BibTeX.
 	assert bs1
 
@@ -217,14 +218,15 @@ def update_bibtex_string(i, bs1):
 				break
 
 	if not doi:
-		print(Style.BRIGHT + Fore.YELLOW)
-		intro()
-		print('Cannot find title!')
-		print('Possible titles:')
-		for pt in possible_titles[0:POSSIBLE_TITLES_PRINT_NUM]:
-			print('\t', pt)
-		print(r1.url)
-		print(Style.RESET_ALL)
+		if not ignore_miss:
+			print(Style.BRIGHT + Fore.YELLOW)
+			intro()
+			print('Cannot find title!')
+			print('Possible titles:')
+			for pt in possible_titles[0:POSSIBLE_TITLES_PRINT_NUM]:
+				print('\t', pt)
+			print(r1.url)
+			print(Style.RESET_ALL)
 		return bs1
 
 	r2 = requests.get(
@@ -249,7 +251,7 @@ def update_bibtex_string(i, bs1):
 
 	
 	if 'title' not in b2:
-		print(Style.BRIGHT + Fore.YELLOW)
+		print(Style.BRIGHT + Fore.RED)
 		intro()
 		print('Strange results!')
 		print(b2)
@@ -258,7 +260,10 @@ def update_bibtex_string(i, bs1):
 		print(Style.RESET_ALL)
 		return bs1
 
-	b2['ID'] = b1['ID']
+	if bid1:
+		b2['ID'] = bid1
+	else:
+		b2['ID'] = b1['ID']
 
 	b2['title'] = correct_title(b2['title'])
 	if 'author' in b2:
@@ -287,7 +292,7 @@ def update_bibtex_string(i, bs1):
 	return bs2
 
 
-def create_bibtex_string(i, title):
+def create_bibtex_string(ignore_miss, i, title, bid1):
 	# Download new BibTeX.
 
 	if correct_title(title) in titles_to_ignore:
@@ -329,14 +334,15 @@ def create_bibtex_string(i, title):
 				break
 
 	if not doi:
-		print(Style.BRIGHT + Fore.YELLOW)
-		intro()
-		print('Cannot find title!')
-		print('Possible titles:')
-		for pt in possible_titles[0:POSSIBLE_TITLES_PRINT_NUM]:
-			print('\t', pt)
-		print(r1.url)
-		print(Style.RESET_ALL)
+		if not ignore_miss:
+			print(Style.BRIGHT + Fore.YELLOW)
+			intro()
+			print('Cannot find title!')
+			print('Possible titles:')
+			for pt in possible_titles[0:POSSIBLE_TITLES_PRINT_NUM]:
+				print('\t', pt)
+			print(r1.url)
+			print(Style.RESET_ALL)
 		return None
 
 	r2 = requests.get(
@@ -360,7 +366,7 @@ def create_bibtex_string(i, title):
 
 
 	if 'title' not in b2:
-		print(Style.BRIGHT + Fore.YELLOW)
+		print(Style.BRIGHT + Fore.RED)
 		intro()
 		print('Strange results!')
 		print(b2)
@@ -369,7 +375,10 @@ def create_bibtex_string(i, title):
 		print(Style.RESET_ALL)
 		return None
 
-	b2['ID'] = 'TODO_' + b2['ID']
+	if bid1:
+		b2['ID'] = bid1
+	else:
+		b2['ID'] = 'TODO_' + b2['ID']
 
 	b2['title'] = correct_title(b2['title'])
 	if 'author' in b2:
@@ -399,16 +408,18 @@ def create_bibtex_string(i, title):
 
 
 
-def update_bibtex_range(range_start, range_end):
+def update_bibtex_range(ignore_miss, range_start, range_end):
 	print('Creating/updating BibTeX in DB file: ', db_file)
+	debug(ignore_miss)
 
 	con = sqlite3.connect(db_file)
 	cur = con.cursor()
 
-	cur.execute("select `Title`, `BibTeX` from `Papers`")
+	cur.execute("select `Title`, `BibTeX`, `BibTeX_ID` from `Papers`")
 	t1 = cur.fetchall()
 	titles = [tt[0] for tt in t1]
 	bibtexes = [tt[1] for tt in t1]
+	bibtexe_ids = [tt[2] for tt in t1]
 
 	# Search range.
 	def entry_to_idx(entry):
@@ -427,9 +438,19 @@ def update_bibtex_range(range_start, range_end):
 	for idx in r:
 		i = idx+1
 		if bibtexes[idx]:
-			bibtexes[idx] = update_bibtex_string(i, bibtexes[idx])
+			bibtexes[idx] = update_bibtex_string(
+				ignore_miss,
+				i,
+				bibtexes[idx],
+				bibtexe_ids[idx]
+			)
 		else:
-			bibtexes[idx] = create_bibtex_string(i, titles[idx])
+			bibtexes[idx] = create_bibtex_string(
+				ignore_miss,
+				i,
+				titles[idx],
+				bibtexe_ids[idx]
+			)
 
 	for idx in r:
 		cur.execute(
@@ -444,6 +465,12 @@ def update_bibtex_range(range_start, range_end):
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(
 		description = __doc__
+	)
+	parser.add_argument(
+		'-i',
+		'--ignore-miss',
+		action = 'store_true',
+		help = 'Ignore and do not report misses (Cannot find title)'
 	)
 	parser.add_argument(
 		'entry_or_range_start',
@@ -463,11 +490,13 @@ if __name__ == '__main__':
 
 	if args.range_end:
 		update_bibtex_range(
+			args.ignore_miss,
 			args.entry_or_range_start[0],
 			args.range_end
 		)
 	else:
 		update_bibtex_range(
+			args.ignore_miss,
 			args.entry_or_range_start[0],
 			args.entry_or_range_start[0]
 		)
