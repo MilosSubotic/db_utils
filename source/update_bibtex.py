@@ -372,7 +372,7 @@ def update_bibtex_range(range_start, range_end):
 		return idx
 
 	print('In range: [', range_start, ', ', range_end, '] (closed interval)')
-
+	
 	start_idx = entry_to_idx(range_start)
 	end_idx = entry_to_idx(range_end)
 	r = range(start_idx, end_idx+1)
@@ -384,10 +384,10 @@ def update_bibtex_range(range_start, range_end):
 		else:
 			bibtexes[idx] = create_bibtex_string(i, titles[idx])
 
-	for i in r:
+	for idx in r:
 		cur.execute(
 			"update `Papers` set `BibTeX`=? where `Title`=?",
-			(bibtexes[i], titles[i])
+			(bibtexes[idx], titles[idx])
 		)
 
 	con.commit()
