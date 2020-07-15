@@ -49,6 +49,8 @@ special_words = [
 	'EMC/EMI', 'GPR'
 ]
 
+POSSIBLE_TITLES_PRINT_NUM = 1
+
 ###############################################################################
 
 def parse_version(s):
@@ -199,8 +201,17 @@ def update_bibtex_string(i, bs1):
 	assert a['status'] == 'ok'
 
 	doi = None
+	possible_titles = []
 	for it in a['message']['items']:
 		if 'title' in it and len(it['title']) != 0:
+			# For testing.
+			if len(it['title']) != 1:
+				print(Style.BRIGHT + Fore.RED)
+				intro()
+				print('Multiple titles on one entry')
+				print(Style.RESET_ALL)
+			
+			possible_titles.append(it['title'][0])
 			if eq_titles(title, it['title'][0]):
 				doi = it['DOI']
 				break
@@ -209,8 +220,9 @@ def update_bibtex_string(i, bs1):
 		print(Style.BRIGHT + Fore.YELLOW)
 		intro()
 		print('Cannot find title!')
-		print('First match title:')
-		print(a['message']['items'][0]['title'][0])
+		print('Possible titles:')
+		for pt in possible_titles[0:POSSIBLE_TITLES_PRINT_NUM]:
+			print('\t', pt)
 		print(r1.url)
 		print(Style.RESET_ALL)
 		return bs1
@@ -301,8 +313,17 @@ def create_bibtex_string(i, title):
 	assert a['status'] == 'ok'
 
 	doi = None
+	possible_titles = []
 	for it in a['message']['items']:
 		if 'title' in it and len(it['title']) != 0:
+			# For testing.
+			if len(it['title']) != 1:
+				print(Style.BRIGHT + Fore.RED)
+				intro()
+				print('Multiple titles on one entry')
+				print(Style.RESET_ALL)
+			
+			possible_titles.append(it['title'][0])
 			if eq_titles(title, it['title'][0]):
 				doi = it['DOI']
 				break
@@ -311,8 +332,9 @@ def create_bibtex_string(i, title):
 		print(Style.BRIGHT + Fore.YELLOW)
 		intro()
 		print('Cannot find title!')
-		print('First match title:')
-		print(a['message']['items'][0]['title'][0])
+		print('Possible titles:')
+		for pt in possible_titles[0:POSSIBLE_TITLES_PRINT_NUM]:
+			print('\t', pt)
 		print(r1.url)
 		print(Style.RESET_ALL)
 		return None
