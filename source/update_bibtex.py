@@ -196,7 +196,7 @@ def update_bibtex_string(i, bs1):
 
 	doi = None
 	for it in a['message']['items']:
-		if len(it['title']) != 0:
+		if 'title' in it and len(it['title']) != 0:
 			if eq_titles(title, it['title'][0]):
 				doi = it['DOI']
 				break
