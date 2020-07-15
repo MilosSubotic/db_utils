@@ -227,7 +227,7 @@ def update_bibtex_string(i, bs1):
 	b1 = bd1.entries[0]
 	b2 = bd2.entries[0]
 
-
+	
 	if 'title' not in b2:
 		intro()
 		print('Strange results!')
@@ -239,7 +239,8 @@ def update_bibtex_string(i, bs1):
 	b2['ID'] = b1['ID']
 
 	b2['title'] = correct_title(b2['title'])
-	b2['author'] = correct_author(b2['author'])
+	if 'author' in b2:
+		b2['author'] = correct_author(b2['author'])
 
 	link_to_url(b1)
 	link_to_url(b2)
@@ -331,8 +332,8 @@ def create_bibtex_string(i, title):
 	b2['title'] = correct_title(b2['title'])
 	if 'author' in b2:
 		b2['author'] = correct_author(b2['author'])
-	else:
-		b2['author'] = 'TODO'
+	#else:
+	#	b2['author'] = 'TODO'
 
 	link_to_url(b2)
 	if 'url' in b2:
