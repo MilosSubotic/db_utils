@@ -6,7 +6,7 @@ echo "export PATH=\$PATH:$D" >> ~/.profile
 
 
 # For scripts.
-sudo apt install python3 python3-bibtexparser python3-requests
+sudo apt install python3 python3-bibtexparser python3-requests python3-colorama
 
 # DB Browser for SQLite
 sudo apt install git build-essential cmake libqt4-dev libsqlite3-dev

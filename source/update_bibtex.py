@@ -31,6 +31,8 @@ from bibtexparser.bibdatabase import BibDatabase
 
 import requests
 
+from colorama import Fore, Style
+
 ###############################################################################
 
 titles_to_ignore = [
@@ -186,9 +188,11 @@ def update_bibtex_string(i, bs1):
 	params = {'query' : title, 'rows': '10'}
 	r1 = requests.get('http://api.crossref.org/works', params=params)
 	if r1.status_code != 200:
+		print(Style.BRIGHT + Fore.RED)
 		intro()
 		print(r1.status_code)
 		print(r1.url)
+		print(Style.RESET_ALL)
 		return bs1
 
 	a = get_json_from_request(r1)
@@ -202,11 +206,13 @@ def update_bibtex_string(i, bs1):
 				break
 
 	if not doi:
+		print(Style.BRIGHT + Fore.YELLOW)
 		intro()
 		print('Cannot find title!')
 		print('First match title:')
 		print(a['message']['items'][0]['title'][0])
 		print(r1.url)
+		print(Style.RESET_ALL)
 		return bs1
 
 	r2 = requests.get(
@@ -214,9 +220,11 @@ def update_bibtex_string(i, bs1):
 		'/transform/application/x-bibtex'
 	)
 	if r2.status_code != 200:
+		print(Style.BRIGHT + Fore.RED)
 		intro()
 		print(r2.status_code)
 		print(r2.url)
+		print(Style.RESET_ALL)
 		return bs1
 
 	bs2 = r2.content.decode('utf-8')
@@ -229,11 +237,13 @@ def update_bibtex_string(i, bs1):
 
 	
 	if 'title' not in b2:
+		print(Style.BRIGHT + Fore.YELLOW)
 		intro()
 		print('Strange results!')
 		print(b2)
 		print(r1.url)
 		print(r2.url)
+		print(Style.RESET_ALL)
 		return bs1
 
 	b2['ID'] = b1['ID']
@@ -253,8 +263,10 @@ def update_bibtex_string(i, bs1):
 		# Nothing new.
 		return bs1
 
+	print(Style.BRIGHT + Fore.GREEN)
 	intro()
 	diff_bibs(b1, b2)
+	print(Style.RESET_ALL)
 
 	bw = BibTexWriter()
 	bw.indent = '  '
@@ -278,9 +290,11 @@ def create_bibtex_string(i, title):
 	params = {'query' : title, 'rows': '10'}
 	r1 = requests.get('http://api.crossref.org/works', params=params)
 	if r1.status_code != 200:
+		print(Style.BRIGHT + Fore.RED)
 		intro()
 		print(r1.status_code)
 		print(r1.url)
+		print(Style.RESET_ALL)
 		return None
 
 	a = get_json_from_request(r1)
@@ -294,11 +308,13 @@ def create_bibtex_string(i, title):
 				break
 
 	if not doi:
+		print(Style.BRIGHT + Fore.YELLOW)
 		intro()
 		print('Cannot find title!')
 		print('First match title:')
 		print(a['message']['items'][0]['title'][0])
 		print(r1.url)
+		print(Style.RESET_ALL)
 		return None
 
 	r2 = requests.get(
@@ -306,9 +322,11 @@ def create_bibtex_string(i, title):
 		'/transform/application/x-bibtex'
 	)
 	if r2.status_code != 200:
+		print(Style.BRIGHT + Fore.RED)
 		intro()
 		print(r2.status_code)
 		print(r2.url)
+		print(Style.RESET_ALL)
 		return None
 
 	bs2 = r2.content.decode('utf-8')
@@ -320,11 +338,13 @@ def create_bibtex_string(i, title):
 
 
 	if 'title' not in b2:
+		print(Style.BRIGHT + Fore.YELLOW)
 		intro()
 		print('Strange results!')
 		print(b2)
 		print(r1.url)
 		print(r2.url)
+		print(Style.RESET_ALL)
 		return None
 
 	b2['ID'] = 'TODO_' + b2['ID']
@@ -341,9 +361,13 @@ def create_bibtex_string(i, title):
 	else:
 		b2['url'] = 'TODO'
 
+	print(Style.BRIGHT + Fore.BLUE)
 	intro()
 	for (k, v) in b2.items():
 		print('Added: ', k, ' = ', v)
+	
+	print(Style.RESET_ALL)
+	
 
 	bw = BibTexWriter()
 	bw.indent = '  '
