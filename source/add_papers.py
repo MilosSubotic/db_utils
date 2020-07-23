@@ -21,7 +21,8 @@ import errno
 import shutil
 import sqlite3
 import argparse
-from common.common import *
+from common.utils import *
+from common.db_finder import db_file
 
 from os.path import join, dirname, relpath, basename
 
@@ -87,4 +88,3 @@ if __name__ == '__main__':
 	add_files_to_db(args.files)
 
 ###############################################################################
-

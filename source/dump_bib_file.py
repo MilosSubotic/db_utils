@@ -18,7 +18,8 @@ __copyright__   = 'MIT'
 import os
 import argparse
 import sqlite3
-from common.common import *
+from common.utils import *
+from common.db_finder import db_file
 
 import bibtexparser as bib
 from bibtexparser.bparser import BibTexParser

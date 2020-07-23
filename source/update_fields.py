@@ -23,7 +23,8 @@ import glob
 import sqlite3
 import argparse
 
-from common.common import *
+from common.utils import *
+from common.db_finder import db_file
 
 import bibtexparser as bib
 from bibtexparser.bparser import BibTexParser

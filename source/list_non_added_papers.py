@@ -23,7 +23,8 @@ import glob
 import sqlite3
 import argparse
 
-from common.common import *
+from common.utils import *
+from common.db_finder import db_file
 from os.path import join
 
 ###############################################################################
@@ -74,4 +75,3 @@ if __name__ == '__main__':
 	list_non_added_papers()
 	
 ###############################################################################
-

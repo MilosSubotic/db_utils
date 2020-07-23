@@ -23,39 +23,59 @@ import fnmatch
 
 ###############################################################################
 
-d = os.getcwd()
-while True:
-	os.listdir(d)
-	r = glob.glob(os.path.join(d, '*.sqlite'))
-	if len(r) == 0:
-		d2 = os.path.dirname(d)
-		if d == d2:
-			print('Not in DB tree!', file = sys.stderr)
-			sys.exit(1)
-		else:
-			# Search futher.
-			d = d2
-	elif len(r) == 1:
-		root_dir = d
-		db_file = r[0]
-		break
-	else:
-		print('More than one DB file!', file = sys.stderr)
-		sys.exit(1)
-		
-###############################################################################
-
 # Whole expression.
-_debugRegex = re.compile(r'\bdebug\s*\(\s*(.*)\s*\)')
+_showRegex = re.compile(r'\bshow\s*\(\s*(.*)\s*\)')
 
-def debug(var):
+def show(var):
 	varName = ''
 	for line in inspect.getframeinfo(inspect.currentframe().f_back)[3]:
-		m = _debugRegex.search(line)
+		m = _showRegex.search(line)
 		if m:
 			varName = m.group(1)
 			break
 	print('{0} = {1}'.format(varName, var))
+
+###############################################################################
+
+VERB  = 0
+DEBUG = 1
+INFO  = 2
+WARN  = 3
+ERROR = 4
+FATAL = 5
+
+def msg(msg_type, *args, **kwargs):
+	if msg_type == VERB:
+		color = "\x1b[37m"
+		msg_type_str = "verbose"
+	elif msg_type == DEBUG:
+		color = "\x1b[92m"
+		msg_type_str = "debug"
+	elif msg_type == INFO:
+		color = "\x1b[94m"
+		msg_type_str = "info"
+	elif msg_type == WARN:
+		color = "\x1b[93m"
+		msg_type_str = "warning"
+	elif msg_type == ERROR:
+		color = "\x1b[91m"
+		msg_type_str = "error"
+	elif msg_type == FATAL:
+		color = "\x1b[91m"
+		msg_type_str = "fatal"
+	else:
+		raise AssertError("Wrong msg_type!")
+		
+	print(
+		color + msg_type_str + ":",
+		*args,
+		"\x1b[0m", # Return to normal.
+		**kwargs
+	)
+
+	if msg_type == FATAL:
+		sys.exit(1)
+		
 
 def warn(*args, **kwargs):
 	print('WARN: ', *args, file = sys.stderr, **kwargs)
@@ -64,6 +84,7 @@ def error(*args, **kwargs):
 	print('ERROR: ', *args, file = sys.stderr, **kwargs)
 	sys.exit(1)
 
+###############################################################################
 
 def correct_path(path):
 	return path.replace('\\', '/')

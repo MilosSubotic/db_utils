@@ -21,7 +21,8 @@ __copyright__   = 'MIT'
 import os
 import argparse
 import sqlite3
-from common.common import *
+from common.utils import *
+from common.db_finder import db_file
 import re
 
 import bibtexparser as bib
@@ -30,8 +31,6 @@ from bibtexparser.bwriter import BibTexWriter
 from bibtexparser.bibdatabase import BibDatabase
 
 import requests
-
-from colorama import Fore, Style
 
 ###############################################################################
 
@@ -88,16 +87,16 @@ def diff_bibs(b1, b2):
 	ks = set(b1.keys()).union(set(b2.keys()))
 	for k in ks:
 		if k not in b1 and k in b2:
-			print('Added: ', k, ' = ', b2[k])
+			msg(INFO, 'Added: ', k, ' = ', b2[k])
 		elif k in b1 and k not in b2:
-			print('Removed: ', k, ' = ', b1[k])
+			msg(INFO, 'Removed: ', k, ' = ', b1[k])
 		elif k in b1 and k in b1:
 			if b1[k] != b2[k]:
 				if k == 'url':
-					print('\n\nURL changed!\n\n')
-				print('Changed: ', k, ' = ', b1[k], ' -> ', b2[k])
+					msg(INFO, '\n\nURL changed!\n\n')
+				msg(INFO, 'Changed: ', k, ' = ', b1[k], ' -> ', b2[k])
 		else:
-			raise AssertError('Canont be here!')
+			raise AssertError('Cannot be here!')
 
 #TODO Better.
 def titlize(s):
@@ -183,19 +182,17 @@ def update_bibtex_string(ignore_miss, i, bs1, bid1):
 		return bs1
 
 	def intro():
-		print()
-		print(i, ' update:')
-		print(title)
+		msg(DEBUG, )
+		msg(DEBUG, i, ' update:')
+		msg(DEBUG, title)
 
 	#params = {'query.title' : title, 'rows': '1'}
 	params = {'query' : title, 'rows': '10'}
 	r1 = requests.get('http://api.crossref.org/works', params=params)
 	if r1.status_code != 200:
-		print(Style.BRIGHT + Fore.RED)
 		intro()
-		print(r1.status_code)
-		print(r1.url)
-		print(Style.RESET_ALL)
+		msg(ERROR, r1.status_code)
+		msg(ERROR, r1.url)
 		return bs1
 
 	a = get_json_from_request(r1)
@@ -207,10 +204,8 @@ def update_bibtex_string(ignore_miss, i, bs1, bid1):
 		if 'title' in it and len(it['title']) != 0:
 			# For testing.
 			if len(it['title']) != 1:
-				print(Style.BRIGHT + Fore.RED)
 				intro()
-				print('Multiple titles on one entry')
-				print(Style.RESET_ALL)
+				msg(ERROR, 'Multiple titles on one entry')
 			
 			possible_titles.append(it['title'][0])
 			if eq_titles(title, it['title'][0]):
@@ -219,14 +214,12 @@ def update_bibtex_string(ignore_miss, i, bs1, bid1):
 
 	if not doi:
 		if not ignore_miss:
-			print(Style.BRIGHT + Fore.YELLOW)
 			intro()
-			print('Cannot find title!')
-			print('Possible titles:')
+			msg(WARN, 'Cannot find title!')
+			msg(VERB, 'Possible titles:')
 			for pt in possible_titles[0:POSSIBLE_TITLES_PRINT_NUM]:
-				print('\t', pt)
-			print(r1.url)
-			print(Style.RESET_ALL)
+				msg(VERB, '\t', pt)
+			msg(VERB, r1.url)
 		return bs1
 
 	r2 = requests.get(
@@ -234,11 +227,9 @@ def update_bibtex_string(ignore_miss, i, bs1, bid1):
 		'/transform/application/x-bibtex'
 	)
 	if r2.status_code != 200:
-		print(Style.BRIGHT + Fore.RED)
 		intro()
-		print(r2.status_code)
-		print(r2.url)
-		print(Style.RESET_ALL)
+		msg(ERROR, r2.status_code)
+		msg(ERROR, r2.url)
 		return bs1
 
 	bs2 = r2.content.decode('utf-8')
@@ -251,13 +242,11 @@ def update_bibtex_string(ignore_miss, i, bs1, bid1):
 
 	
 	if 'title' not in b2:
-		print(Style.BRIGHT + Fore.RED)
 		intro()
-		print('Strange results!')
-		print(b2)
-		print(r1.url)
-		print(r2.url)
-		print(Style.RESET_ALL)
+		msg(ERROR, 'Strange results!')
+		msg(VERB, b2)
+		msg(VERB, r1.url)
+		msg(VERB, r2.url)
 		return bs1
 
 	if bid1:
@@ -280,10 +269,8 @@ def update_bibtex_string(ignore_miss, i, bs1, bid1):
 		# Nothing new.
 		return bs1
 
-	print(Style.BRIGHT + Fore.GREEN)
 	intro()
 	diff_bibs(b1, b2)
-	print(Style.RESET_ALL)
 
 	bw = BibTexWriter()
 	bw.indent = '  '
@@ -307,11 +294,9 @@ def create_bibtex_string(ignore_miss, i, title, bid1):
 	params = {'query' : title, 'rows': '10'}
 	r1 = requests.get('http://api.crossref.org/works', params=params)
 	if r1.status_code != 200:
-		print(Style.BRIGHT + Fore.RED)
 		intro()
-		print(r1.status_code)
-		print(r1.url)
-		print(Style.RESET_ALL)
+		msg(ERROR, r1.status_code)
+		msg(ERROR, r1.url)
 		return None
 
 	a = get_json_from_request(r1)
@@ -323,10 +308,8 @@ def create_bibtex_string(ignore_miss, i, title, bid1):
 		if 'title' in it and len(it['title']) != 0:
 			# For testing.
 			if len(it['title']) != 1:
-				print(Style.BRIGHT + Fore.RED)
 				intro()
-				print('Multiple titles on one entry')
-				print(Style.RESET_ALL)
+				msg(ERROR, 'Multiple titles on one entry')
 			
 			possible_titles.append(it['title'][0])
 			if eq_titles(title, it['title'][0]):
@@ -335,14 +318,12 @@ def create_bibtex_string(ignore_miss, i, title, bid1):
 
 	if not doi:
 		if not ignore_miss:
-			print(Style.BRIGHT + Fore.YELLOW)
 			intro()
-			print('Cannot find title!')
-			print('Possible titles:')
+			msg(WARN, 'Cannot find title!')
+			msg(VERB, 'Possible titles:')
 			for pt in possible_titles[0:POSSIBLE_TITLES_PRINT_NUM]:
-				print('\t', pt)
-			print(r1.url)
-			print(Style.RESET_ALL)
+				msg(VERB, '\t', pt)
+			msg(VERB, r1.url)
 		return None
 
 	r2 = requests.get(
@@ -350,11 +331,9 @@ def create_bibtex_string(ignore_miss, i, title, bid1):
 		'/transform/application/x-bibtex'
 	)
 	if r2.status_code != 200:
-		print(Style.BRIGHT + Fore.RED)
 		intro()
-		print(r2.status_code)
-		print(r2.url)
-		print(Style.RESET_ALL)
+		msg(ERROR, r2.status_code)
+		msg(ERROR, r2.url)
 		return None
 
 	bs2 = r2.content.decode('utf-8')
@@ -366,13 +345,11 @@ def create_bibtex_string(ignore_miss, i, title, bid1):
 
 
 	if 'title' not in b2:
-		print(Style.BRIGHT + Fore.RED)
 		intro()
-		print('Strange results!')
-		print(b2)
-		print(r1.url)
-		print(r2.url)
-		print(Style.RESET_ALL)
+		msg(ERROR, 'Strange results!')
+		msg(VERB, b2)
+		msg(VERB, r1.url)
+		msg(VERB, r2.url)
 		return None
 
 	if bid1:
@@ -392,12 +369,9 @@ def create_bibtex_string(ignore_miss, i, title, bid1):
 	else:
 		b2['url'] = 'TODO'
 
-	print(Style.BRIGHT + Fore.BLUE)
 	intro()
 	for (k, v) in b2.items():
-		print('Added: ', k, ' = ', v)
-	
-	print(Style.RESET_ALL)
+		msg(DEBUG, 'Added: ', k, ' = ', v)
 	
 
 	bw = BibTexWriter()
@@ -410,7 +384,6 @@ def create_bibtex_string(ignore_miss, i, title, bid1):
 
 def update_bibtex_range(ignore_miss, range_start, range_end):
 	print('Creating/updating BibTeX in DB file: ', db_file)
-	debug(ignore_miss)
 
 	con = sqlite3.connect(db_file)
 	cur = con.cursor()

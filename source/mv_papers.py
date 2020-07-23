@@ -9,7 +9,7 @@ Move files from hunt place to directory in tree and update DB.
 
 from __future__ import print_function
 
-__author__	    = 'Stefan Maretic, Milos Subotic'
+__author__	    = 'Milos Subotic, Stefan Maretic'
 __email__	    = 'milos.subotic.sm@gmail.com'
 __copyright__   = 'MIT'
 
@@ -22,7 +22,8 @@ import glob
 import subprocess
 import sqlite3
 import argparse
-from common.common import *
+from common.utils import *
+from common.db_finder import db_file
 
 from os.path import join, dirname, basename, relpath, isdir
 
@@ -54,7 +55,7 @@ def file_name_to_title_field(file_name):
 def fill_db(src, dst):
 	d = relpath(dst, root_dir)
 	f = basename(src)
-	title_field = file_name_to_title_field(os.path.splitext(f)[0])
+	new_title_field = file_name_to_title_field(os.path.splitext(f)[0])
 	file_field = join(d, f)
 	splited_src_dir = dirname(src).split('/')
 	
@@ -91,15 +92,25 @@ def fill_db(src, dst):
 	cur.execute("select `Title` from `Papers`")
 	titles = [ t[0] for t in cur.fetchall()]
 	
-	has_title = [t == title_field for t in titles]
-	already_exists = any(has_title)
-	if sum(has_title) > 1:
-		warn('Have multiple similar titles in database.')
+	has_title = [ for t in titles]
+	already_exists = False
+	existing_title_field = None
+	for t in titles:
+		if t.lower() == new_title_field.lower():
+			if already_exists:
+				msg(ERROR, 'Have multiple similar titles in database.')
+			else:
+				already_exists = True
+				existing_title_field = t
+				if existing_title_field != new_title_field:
+					msg(DEBUG, 'Same titles different in case!')
+					msg(VERB, 'Existing:', existing_title_field)
+					msg(VERB, 'New:', new_title_field)
 	
-	# Set index.
-	if not already_exists:
-		index_field = len(titles)+1
-		fields['`Index`'] = index_field
+	if already_exists:
+		title_field = existing_title_field
+	else:
+		title_field = new_title_field
 	
 	print('`Title` = ', title_field)
 	for field_name, field_value in fields.items():
@@ -133,6 +144,10 @@ def fill_db(src, dst):
 			tuple(l)
 		)
 	else:
+		# Set index.
+		index_field = len(titles)+1
+		fields['`Index`'] = index_field
+	
 		query = "insert into `Papers` ("
 		l = []
 		for field_name, field_value in fields.items():
