@@ -22,7 +22,7 @@ import shutil
 import sqlite3
 import argparse
 from common.utils import *
-from common.db_finder import db_file
+from common.db_finder import *
 
 from os.path import join, dirname, relpath, basename
 

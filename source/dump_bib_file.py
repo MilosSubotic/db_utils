@@ -19,7 +19,7 @@ import os
 import argparse
 import sqlite3
 from common.utils import *
-from common.db_finder import db_file
+from common.db_finder import *
 
 import bibtexparser as bib
 from bibtexparser.bparser import BibTexParser

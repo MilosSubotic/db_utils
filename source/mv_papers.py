@@ -23,7 +23,7 @@ import subprocess
 import sqlite3
 import argparse
 from common.utils import *
-from common.db_finder import db_file
+from common.db_finder import *
 
 from os.path import join, dirname, basename, relpath, isdir
 
@@ -92,7 +92,6 @@ def fill_db(src, dst):
 	cur.execute("select `Title` from `Papers`")
 	titles = [ t[0] for t in cur.fetchall()]
 	
-	has_title = [ for t in titles]
 	already_exists = False
 	existing_title_field = None
 	for t in titles:
@@ -207,7 +206,7 @@ def move_dir(src, dst):
 
 def move_glob(src, dst):
 	srcs = []
-	debug(src)
+	
 	for s in src:
 		# Escapaping [ and ].
 		e = ''
