@@ -44,7 +44,13 @@ WARN  = 3
 ERROR = 4
 FATAL = 5
 
+__MSG_PRINT_TYPE = True
+def msg_print_type(tf):
+	global __MSG_PRINT_TYPE
+	__MSG_PRINT_TYPE = tf
+
 def msg(msg_type, *args, **kwargs):
+	global __MSG_PRINT_TYPE
 	if msg_type == VERB:
 		color = "\x1b[37m"
 		msg_type_str = "verbose"
@@ -65,9 +71,15 @@ def msg(msg_type, *args, **kwargs):
 		msg_type_str = "fatal"
 	else:
 		raise AssertError("Wrong msg_type!")
-		
+	
+	if __MSG_PRINT_TYPE:
+		m = msg_type_str + ":"
+	else:
+		m = ""
+	
+	#TODO No space in between.
 	print(
-		color + msg_type_str + ":",
+		color + m,
 		*args,
 		"\x1b[0m", # Return to normal.
 		**kwargs
@@ -75,7 +87,7 @@ def msg(msg_type, *args, **kwargs):
 
 	if msg_type == FATAL:
 		sys.exit(1)
-		
+
 
 def warn(*args, **kwargs):
 	print('WARN: ', *args, file = sys.stderr, **kwargs)

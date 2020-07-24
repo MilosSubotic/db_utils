@@ -22,6 +22,7 @@ import os
 import argparse
 import sqlite3
 from common.utils import *
+msg_print_type(False)
 from common.db_finder import *
 import re
 
@@ -182,9 +183,9 @@ def update_bibtex_string(ignore_miss, i, bs1, bid1):
 		return bs1
 
 	def intro():
-		msg(DEBUG, )
-		msg(DEBUG, i, ' update:')
-		msg(DEBUG, title)
+		msg(INFO, )
+		msg(INFO, i, ' update:')
+		msg(INFO, title)
 
 	#params = {'query.title' : title, 'rows': '1'}
 	params = {'query' : title, 'rows': '10'}
@@ -286,9 +287,9 @@ def create_bibtex_string(ignore_miss, i, title, bid1):
 		return None
 
 	def intro():
-		print()
-		print(i, ' create:')
-		print(title)
+		msg(DEBUG, )
+		msg(DEBUG, i, ' insert:')
+		msg(DEBUG, title)
 
 	#params = {'query.title' : title, 'rows': '1'}
 	params = {'query' : title, 'rows': '10'}
@@ -399,17 +400,17 @@ def update_bibtex_range(ignore_miss, range_start, range_end):
 		i = int(entry)
 		if i <= 0 or i > len(titles):
 			error('Index ', i, ' is out of range for DB!')
-		idx = i-1
+		idx = i - 1
 		return idx
 
 	print('In range: [', range_start, ', ', range_end, '] (closed interval)')
 	
 	start_idx = entry_to_idx(range_start)
 	end_idx = entry_to_idx(range_end)
-	r = range(start_idx, end_idx+1)
+	r = range(start_idx, end_idx + 1)
 
 	for idx in r:
-		i = idx+1
+		i = idx + 1
 		if bibtexes[idx]:
 			bibtexes[idx] = update_bibtex_string(
 				ignore_miss,

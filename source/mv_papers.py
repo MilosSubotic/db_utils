@@ -23,14 +23,15 @@ import subprocess
 import sqlite3
 import argparse
 from common.utils import *
+msg_print_type(False)
 from common.db_finder import *
 
 from os.path import join, dirname, basename, relpath, isdir
 
 ###############################################################################
 
-def file_name_to_title_field(file_name):
-	title_field = file_name
+def file_name_to_title(file_name):
+	title = file_name
 	def warn_about(fn_code):
 		if fn_code in file_name:
 			warn('Has "', fn_code, '" in file name.')
@@ -41,16 +42,16 @@ def file_name_to_title_field(file_name):
 	
 	warn_about('<')
 	warn_about('>')
-	title_field = title_field.replace('..', ':')
-	title_field = title_field.replace('\'\'', '\"')
-	title_field = title_field.replace('~~', '/')
+	title = title.replace('..', ':')
+	title = title.replace('\'\'', '\"')
+	title = title.replace('~~', '/')
 	warn_about2('~')
 	warn_about('\\')
 	warn_about('|')
 	warn_about('?')
 	warn_about('*')
 	
-	return title_field
+	return title
 
 def diff_fields(f1, f2):
 	ks = set(f1.keys()).union(set(f2.keys()))
@@ -70,7 +71,7 @@ def diff_fields(f1, f2):
 def fill_db(src, dst):
 	d = relpath(dst, root_dir)
 	f = basename(src)
-	new_title_field = file_name_to_title_field(os.path.splitext(f)[0])
+	new_title = file_name_to_title(os.path.splitext(f)[0])
 	file_field = join(d, f)
 	splited_src_dir = dirname(src).split('/')
 	
@@ -104,44 +105,51 @@ def fill_db(src, dst):
 	titles = [ t[0] for t in cur.fetchall()]
 	
 	already_exists = False
-	old_title_field = None
-	for t in titles:
-		if t.lower() == new_title_field.lower():
+	i = len(titles) + 1 # New one if inserting
+	old_title = None
+	for (idx, t) in enumerate(titles):
+		if t.lower() == new_title.lower():
 			if already_exists:
 				msg(ERROR, 'Have multiple similar titles in database.')
 			else:
 				already_exists = True
-				old_title_field = t
-				if old_title_field != new_title_field:
+				i = idx + 1
+				old_title = t
+				if old_title != new_title:
 					msg(DEBUG, 'Same titles different in case!')
-					msg(VERB, 'Existing:', old_title_field)
-					msg(VERB, 'New:', new_title_field)
+					msg(VERB, 'Existing:', old_title)
+					msg(VERB, 'New:', new_title)
 	
 	
 	old_fields = {}
 	if already_exists:
-		title_field = old_title_field
+		title = old_title
 		if False:
 			# Prefer new title.
-			new_fields['`Title`'] = title_field
+			new_fields['`Title`'] = new_title
 			
 		for field_name in new_fields.keys():
 			cur.execute(
 				"select {0} from `Papers` where `Title`=?".format(
 					field_name
 				),
-				(title_field,)
+				(title,)
 			)
 			old_fields[field_name] = cur.fetchall()[0][0]
 	else:
-		title_field = new_title_field
-		new_fields['`Title`'] = title_field
-		# Set index.
-		index_field = len(titles)+1
-		new_fields['`Index`'] = index_field
+		title = new_title
+		new_fields['`Title`'] = title
+		new_fields['`Index`'] = i
 	
 	
-	msg(VERB, '`Title` = ', title_field)
+	if already_exists:
+		msg(INFO)
+		msg(INFO, i, ' update:')
+		msg(INFO, title)
+	else:
+		msg(DEBUG)
+		msg(DEBUG, i, ' insert:')
+		msg(DEBUG, title)
 	diff_fields(old_fields, new_fields)
 	
 	if already_exists:
@@ -151,7 +159,7 @@ def fill_db(src, dst):
 		
 		cur.execute(
 			query,
-			tuple(list(new_fields.values()) + [title_field])
+			tuple(list(new_fields.values()) + [title])
 		)
 	else:
 		query = "insert into `Papers` ("
