@@ -52,6 +52,21 @@ def file_name_to_title_field(file_name):
 	
 	return title_field
 
+def diff_fields(f1, f2):
+	ks = set(f1.keys()).union(set(f2.keys()))
+	for k in ks:
+		if k not in f1 and k in f2:
+			msg(INFO, 'Added: ', k, ' = ', f2[k])
+		elif k in f1 and k not in f2:
+			msg(INFO, 'Removed: ', k, ' = ', f1[k])
+		elif k in f1 and k in f1:
+			if f1[k] != f2[k]:
+				if k == 'url':
+					msg(INFO, '\n\nURL changed!\n\n')
+				msg(INFO, 'Changed: ', k, ' = ', f1[k], ' -> ', f2[k])
+		else:
+			raise AssertError('Cannot be here!')
+
 def fill_db(src, dst):
 	d = relpath(dst, root_dir)
 	f = basename(src)
@@ -59,30 +74,26 @@ def fill_db(src, dst):
 	file_field = join(d, f)
 	splited_src_dir = dirname(src).split('/')
 	
-	fields = {
-		'`File`'             : file_field,
-		'`Where_searched`'   : None,
-		'`Search_keywords`'  : None,
-		'`Reference_from`'   : None,
-		'`Because_it_cited`' : None
+	new_fields = {
+		'`File`' : file_field
 	}
 	because_it_cited_field = None
 	reason = splited_src_dir[-2]
 	d1 = splited_src_dir[-1]
 	if reason == 'kw':
-		fields['`Search_keywords`'] = d1
-		fields['`Where_searched`'] = 'Google Scholar'
+		new_fields['`Search_keywords`'] = d1
+		new_fields['`Where_searched`'] = 'Google Scholar'
 		s = d1.split(' - ')
 		if len(s) >= 2:
 			ws = s[-1]
 			sk = ' - '.join(s[0:-1])
 			if ws in ['google.com', 'Wiki']:
-				fields['`Where_searched`'] = ws
-				fields['`Search_keywords`'] = sk
+				new_fields['`Where_searched`'] = ws
+				new_fields['`Search_keywords`'] = sk
 	elif reason == 'ref' or reason == 'refs':
-		fields['`Reference_from`'] = d1
+		new_fields['`Reference_from`'] = d1
 	elif reason == 'cites':
-		fields['`Because_it_cited`'] = d1
+		new_fields['`Because_it_cited`'] = d1
 	else:
 		reason = None
 
@@ -93,73 +104,65 @@ def fill_db(src, dst):
 	titles = [ t[0] for t in cur.fetchall()]
 	
 	already_exists = False
-	existing_title_field = None
+	old_title_field = None
 	for t in titles:
 		if t.lower() == new_title_field.lower():
 			if already_exists:
 				msg(ERROR, 'Have multiple similar titles in database.')
 			else:
 				already_exists = True
-				existing_title_field = t
-				if existing_title_field != new_title_field:
+				old_title_field = t
+				if old_title_field != new_title_field:
 					msg(DEBUG, 'Same titles different in case!')
-					msg(VERB, 'Existing:', existing_title_field)
+					msg(VERB, 'Existing:', old_title_field)
 					msg(VERB, 'New:', new_title_field)
 	
+	
+	old_fields = {}
 	if already_exists:
-		title_field = existing_title_field
+		title_field = old_title_field
+		if False:
+			# Prefer new title.
+			new_fields['`Title`'] = title_field
+			
+		for field_name in new_fields.keys():
+			cur.execute(
+				"select {0} from `Papers` where `Title`=?".format(
+					field_name
+				),
+				(title_field,)
+			)
+			old_fields[field_name] = cur.fetchall()[0][0]
 	else:
 		title_field = new_title_field
-	
-	print('`Title` = ', title_field)
-	for field_name, field_value in fields.items():
-		if field_value:
-			print(field_name, ' = ', field_value)
-	
-	if already_exists:
-		# If there is no new value for field, use that alredy in table.
-		
-		for field_name in fields.keys():
-			if not fields[field_name]:
-				cur.execute(
-					"select {0} from `Papers` where `Title`=?".format(
-						field_name
-					),
-					(title_field,)
-				)
-				fields[field_name] = cur.fetchall()[0][0]
-		
-		query = "update `Papers` set "
-		l = []
-		for field_name, field_value in fields.items():
-			query += field_name + "=?, "
-			l.append(field_value)
-		query= query[:-2] # Remove trailing ', '.
-		query += " where `Title`=?"
-		l.append(title_field)
-		
-		cur.execute(
-			query,
-			tuple(l)
-		)
-	else:
+		new_fields['`Title`'] = title_field
 		# Set index.
 		index_field = len(titles)+1
-		fields['`Index`'] = index_field
+		new_fields['`Index`'] = index_field
 	
-		query = "insert into `Papers` ("
-		l = []
-		for field_name, field_value in fields.items():
-			query += field_name + ", "
-			l.append(field_value)
-		query += "`Title`) values ("
-		query += '?, ' * len(fields)
-		query += "?)"
-		l.append(title_field)
+	
+	msg(VERB, '`Title` = ', title_field)
+	diff_fields(old_fields, new_fields)
+	
+	if already_exists:
+		query = "update `Papers` set "
+		query += ", ".join([fn + "=?" for fn in new_fields.keys()])
+		query += " where `Title`=?"
 		
 		cur.execute(
 			query,
-			tuple(l)
+			tuple(list(new_fields.values()) + [title_field])
+		)
+	else:
+		query = "insert into `Papers` ("
+		query += ", ".join(new_fields.keys())
+		query += ") values ("
+		query += ", ".join(['?'] * len(new_fields))
+		query += ")"
+		
+		cur.execute(
+			query,
+			tuple(new_fields.values())
 		)
 		
 	
