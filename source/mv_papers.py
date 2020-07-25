@@ -47,6 +47,8 @@ def file_name_to_title(file_name):
 	title = title.replace('~~', '/')
 	title = title.replace('^^', '?')
 	warn_about2('~')
+	warn_about2('^')
+	warn_about2('\'')
 	warn_about('\\')
 	warn_about('|')
 	warn_about('*')
