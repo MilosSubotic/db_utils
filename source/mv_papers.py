@@ -45,10 +45,10 @@ def file_name_to_title(file_name):
 	title = title.replace('..', ':')
 	title = title.replace('\'\'', '\"')
 	title = title.replace('~~', '/')
+	title = title.replace('^^', '?')
 	warn_about2('~')
 	warn_about('\\')
 	warn_about('|')
-	warn_about('?')
 	warn_about('*')
 	
 	return title
@@ -101,8 +101,9 @@ def fill_db(src, dst):
 	con = sqlite3.connect(db_file)
 	cur = con.cursor()
 
-	cur.execute("select `Title` from `Papers`")
-	titles = [ t[0] for t in cur.fetchall()]
+	cur.execute("select `Title`, `Index` from `Papers`")
+	t1 = cur.fetchall()
+	titles = [tt[0] for tt in t1]
 	
 	already_exists = False
 	i = len(titles) + 1 # New one if inserting
