@@ -77,13 +77,10 @@ def msg(msg_type, *args, **kwargs):
 	else:
 		m = ""
 	
-	#TODO No space in between.
-	print(
-		color + m,
-		*args,
-		"\x1b[0m", # Return to normal.
-		**kwargs
-	)
+	print(color + m, sep = '', end = '')
+	print(*args, **kwargs, sep = '', end = '')
+	print("\x1b[0m", sep = '', end = '') # Return to normal.
+	print()
 
 	if msg_type == FATAL:
 		sys.exit(1)
