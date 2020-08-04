@@ -58,13 +58,13 @@ def diff_fields(f1, f2):
 	ks = set(f1.keys()).union(set(f2.keys()))
 	for k in ks:
 		if k not in f1 and k in f2:
-			msg(INFO, 'Added: ', k, ' = ', f2[k])
+			msg(DEBUG, 'Added: ', k, ' = ', f2[k])
 		elif k in f1 and k not in f2:
-			msg(INFO, 'Removed: ', k, ' = ', f1[k])
+			msg(WARN, 'Removed: ', k, ' = ', f1[k])
 		elif k in f1 and k in f1:
 			if f1[k] != f2[k]:
 				if k == 'url':
-					msg(INFO, '\n\nURL changed!\n\n')
+					msg(WARN, '\n\nURL changed!\n\n')
 				msg(INFO, 'Changed: ', k, ' = ', f1[k], ' -> ', f2[k])
 		else:
 			raise AssertError('Cannot be here!')
