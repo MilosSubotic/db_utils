@@ -280,7 +280,7 @@ def update_bibtex_string(ignore_miss, i, bs1, bid1):
 	return bs2
 
 
-def create_bibtex_string(ignore_miss, i, title, bid1):
+def insert_bibtex_string(ignore_miss, i, title, bid1):
 	# Download new BibTeX.
 
 	if correct_title(title) in titles_to_ignore:
@@ -419,7 +419,7 @@ def update_bibtex_range(ignore_miss, range_start, range_end):
 				bibtexe_ids[idx]
 			)
 		else:
-			bibtexes[idx] = create_bibtex_string(
+			bibtexes[idx] = insert_bibtex_string(
 				ignore_miss,
 				i,
 				titles[idx],
