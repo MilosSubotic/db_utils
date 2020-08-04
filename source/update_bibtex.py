@@ -35,7 +35,8 @@ import requests
 
 ###############################################################################
 
-POSSIBLE_TITLES_PRINT_NUM = 1
+#POSSIBLE_TITLES_PRINT_NUM = 1 # Just first
+POSSIBLE_TITLES_PRINT_NUM = 1000000 # All
 
 #TODO Nicer
 titles_to_ignore = [
@@ -88,13 +89,13 @@ def diff_bibs(b1, b2):
 	ks = set(b1.keys()).union(set(b2.keys()))
 	for k in ks:
 		if k not in b1 and k in b2:
-			msg(INFO, 'Added: ', k, ' = ', b2[k])
+			msg(DEBUG, 'Added: ', k, ' = ', b2[k])
 		elif k in b1 and k not in b2:
-			msg(INFO, 'Removed: ', k, ' = ', b1[k])
+			msg(WARN, 'Removed: ', k, ' = ', b1[k])
 		elif k in b1 and k in b1:
 			if b1[k] != b2[k]:
 				if k == 'url':
-					msg(INFO, '\n\nURL changed!\n\n')
+					msg(WARN, '\n\nURL changed!\n\n')
 				msg(INFO, 'Changed: ', k, ' = ', b1[k], ' -> ', b2[k])
 		else:
 			raise AssertError('Cannot be here!')
@@ -168,24 +169,37 @@ def prep_title(t):
 def eq_titles(t1, t2):
 	return prep_title(t1) == prep_title(t2)
 
-def update_bibtex_string(ignore_miss, i, bs1, bid1):
-	# Update existing BibTeX.
-	assert bs1
 
-	bd1 = bib.loads(bs1, create_parser())
-	if len(bd1.entries) == 0:
-		# Cannot parse BibTeX.
-		return bs1
-
-	title = bd1.entries[0]['title']
+def update_bibtex_string(
+	ignore_miss,
+	i,
+	title,
+	bid1,
+	bs1
+):
+	if bs1:
+		# Update existing BibTeX.
+		bd1 = bib.loads(bs1, create_parser())
+		if len(bd1.entries) == 0:
+			msg(ERROR, 'Cannot parse BibTeX')
+			return bs1	
+		b1 = bd1.entries[0]
+	else:
+		# Download new BibTeX.
+		b1 = {}
 
 	if correct_title(title) in titles_to_ignore:
 		return bs1
 
 	def intro():
-		msg(INFO, )
-		msg(INFO, i, ' update:')
-		msg(INFO, title)
+		if bs1:
+			msg(INFO, )
+			msg(INFO, i, ' update:')
+			msg(INFO, title)
+		else:
+			msg(DEBUG, )
+			msg(DEBUG, i, ' insert:')
+			msg(DEBUG, title)
 
 	#params = {'query.title' : title, 'rows': '1'}
 	params = {'query' : title, 'rows': '10'}
@@ -238,7 +252,6 @@ def update_bibtex_string(ignore_miss, i, bs1, bid1):
 
 	bd2 = BibDatabase()
 	bd2.entries = [bd2t.entries[0]]
-	b1 = bd1.entries[0]
 	b2 = bd2.entries[0]
 
 	
@@ -253,7 +266,10 @@ def update_bibtex_string(ignore_miss, i, bs1, bid1):
 	if bid1:
 		b2['ID'] = bid1
 	else:
-		b2['ID'] = b1['ID']
+		if bs1:
+			b2['ID'] = b1['ID']
+		else:
+			b2['ID'] = 'TODO_' + b2['ID']
 
 	b2['title'] = correct_title(b2['title'])
 	if 'author' in b2:
@@ -278,109 +294,6 @@ def update_bibtex_string(ignore_miss, i, bs1, bid1):
 	bs2 = bw.write(bd2)
 
 	return bs2
-
-
-def insert_bibtex_string(ignore_miss, i, title, bid1):
-	# Download new BibTeX.
-
-	if correct_title(title) in titles_to_ignore:
-		return None
-
-	def intro():
-		msg(DEBUG, )
-		msg(DEBUG, i, ' insert:')
-		msg(DEBUG, title)
-
-	#params = {'query.title' : title, 'rows': '1'}
-	params = {'query' : title, 'rows': '10'}
-	r1 = requests.get('http://api.crossref.org/works', params=params)
-	if r1.status_code != 200:
-		intro()
-		msg(ERROR, r1.status_code)
-		msg(ERROR, r1.url)
-		return None
-
-	a = get_json_from_request(r1)
-	assert a['status'] == 'ok'
-
-	doi = None
-	possible_titles = []
-	for it in a['message']['items']:
-		if 'title' in it and len(it['title']) != 0:
-			# For testing.
-			if len(it['title']) != 1:
-				intro()
-				msg(ERROR, 'Multiple titles on one entry')
-			
-			possible_titles.append(it['title'][0])
-			if eq_titles(title, it['title'][0]):
-				doi = it['DOI']
-				break
-
-	if not doi:
-		if not ignore_miss:
-			intro()
-			msg(WARN, 'Cannot find title!')
-			msg(VERB, 'Possible titles:')
-			for pt in possible_titles[0:POSSIBLE_TITLES_PRINT_NUM]:
-				msg(VERB, '\t', pt)
-			msg(VERB, r1.url)
-		return None
-
-	r2 = requests.get(
-		'http://api.crossref.org/works/' + doi +
-		'/transform/application/x-bibtex'
-	)
-	if r2.status_code != 200:
-		intro()
-		msg(ERROR, r2.status_code)
-		msg(ERROR, r2.url)
-		return None
-
-	bs2 = r2.content.decode('utf-8')
-	bd2t = bib.loads(bs2, create_parser())
-
-	bd2 = BibDatabase()
-	bd2.entries = [bd2t.entries[0]]
-	b2 = bd2.entries[0]
-
-
-	if 'title' not in b2:
-		intro()
-		msg(ERROR, 'Strange results!')
-		msg(VERB, b2)
-		msg(VERB, r1.url)
-		msg(VERB, r2.url)
-		return None
-
-	if bid1:
-		b2['ID'] = bid1
-	else:
-		b2['ID'] = 'TODO_' + b2['ID']
-
-	b2['title'] = correct_title(b2['title'])
-	if 'author' in b2:
-		b2['author'] = correct_author(b2['author'])
-	#else:
-	#	b2['author'] = 'TODO'
-
-	link_to_url(b2)
-	if 'url' in b2:
-		b2['url'] = b2['url'].replace('%2F', '/')
-	else:
-		b2['url'] = 'TODO'
-
-	intro()
-	for (k, v) in b2.items():
-		msg(DEBUG, 'Added: ', k, ' = ', v)
-	
-
-	bw = BibTexWriter()
-	bw.indent = '  '
-	bs2 = bw.write(bd2)
-
-	return bs2
-
 
 
 def update_bibtex_range(ignore_miss, range_start, range_end):
@@ -411,20 +324,13 @@ def update_bibtex_range(ignore_miss, range_start, range_end):
 
 	for idx in r:
 		i = idx + 1
-		if bibtexes[idx]:
-			bibtexes[idx] = update_bibtex_string(
-				ignore_miss,
-				i,
-				bibtexes[idx],
-				bibtexe_ids[idx]
-			)
-		else:
-			bibtexes[idx] = insert_bibtex_string(
-				ignore_miss,
-				i,
-				titles[idx],
-				bibtexe_ids[idx]
-			)
+		bibtexes[idx] = update_bibtex_string(
+			ignore_miss,
+			i,
+			titles[idx],
+			bibtexe_ids[idx],
+			bibtexes[idx]
+		)
 
 	for idx in r:
 		cur.execute(
