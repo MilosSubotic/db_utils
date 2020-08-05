@@ -33,6 +33,9 @@ from bibtexparser.bibdatabase import BibDatabase
 
 import requests
 
+from scholarly import scholarly
+
+
 ###############################################################################
 
 #POSSIBLE_TITLES_PRINT_NUM = 1 # Just first
@@ -201,59 +204,110 @@ def update_bibtex_string(
 			msg(DEBUG, i, ' insert:')
 			msg(DEBUG, title)
 
-	#params = {'query.title' : title, 'rows': '1'}
-	params = {'query' : title, 'rows': '10'}
-	r1 = requests.get('http://api.crossref.org/works', params=params)
-	if r1.status_code != 200:
-		intro()
-		msg(ERROR, r1.status_code)
-		msg(ERROR, r1.url)
-		return bs1
+	########
+	
+	def search_over_crossref_org():
+		#params = {'query.title' : title, 'rows': '1'}
+		params = {'query' : title, 'rows': '10'}
+		r1 = requests.get('http://api.crossref.org/works', params=params)
+		if r1.status_code != 200:
+			intro()
+			msg(ERROR, r1.status_code)
+			msg(ERROR, r1.url)
+			return None
 
-	a = get_json_from_request(r1)
-	assert a['status'] == 'ok'
+		a = get_json_from_request(r1)
+		assert a['status'] == 'ok'
 
-	doi = None
-	possible_titles = []
-	for it in a['message']['items']:
-		if 'title' in it and len(it['title']) != 0:
-			# For testing.
-			if len(it['title']) != 1:
+		doi = None
+		possible_titles = []
+		for it in a['message']['items']:
+			if 'title' in it and len(it['title']) != 0:
+				# For testing.
+				if len(it['title']) != 1:
+					intro()
+					msg(ERROR, 'Multiple titles on one entry')
+				
+				t = it['title'][0]
+				possible_titles.append(t)
+				if eq_titles(title, t):
+					if doi:
+						intro()
+						msg(ERROR, 'Multiple same titles')
+					else:
+						doi = it['DOI']
+					break
+
+		if not doi:
+			if not ignore_miss:
 				intro()
-				msg(ERROR, 'Multiple titles on one entry')
-			
-			possible_titles.append(it['title'][0])
-			if eq_titles(title, it['title'][0]):
-				doi = it['DOI']
+				msg(WARN, 'Cannot find title over crossref.org!')
+				msg(VERB, 'url: ', r1.url)
+				msg(VERB, 'Possible titles:')
+				for pt in possible_titles[0:POSSIBLE_TITLES_PRINT_NUM]:
+					msg(VERB, '\t', pt)
+			return None
+
+		r2 = requests.get(
+			'http://api.crossref.org/works/' + doi +
+			'/transform/application/x-bibtex'
+		)
+		if r2.status_code != 200:
+			intro()
+			msg(ERROR, r2.status_code)
+			msg(ERROR, r2.url)
+			return None
+
+		bs2 = r2.content.decode('utf-8')
+		return bs2
+
+	def search_over_scholarly():
+		query = scholarly.search_pubs(title)
+		bs2 = None
+		b2_url = None
+		possible_titles = []
+		for i, pub in enumerate(query):
+			if i == 1:
 				break
 
-	if not doi:
-		if not ignore_miss:
-			intro()
-			msg(WARN, 'Cannot find title!')
-			msg(VERB, 'Possible titles:')
-			for pt in possible_titles[0:POSSIBLE_TITLES_PRINT_NUM]:
-				msg(VERB, '\t', pt)
-			msg(VERB, r1.url)
+			t = pub.bib['title']
+			possible_titles.append(t)
+			if eq_titles(title, t):
+				if bs2:
+					intro()
+					msg(ERROR, 'Multiple same titles')
+				else:
+					bs2 = pub.bibtex
+					b2_url = pub.bib['url']
+				pass
+		
+		if not bs2:
+			if not ignore_miss:
+				intro()
+				msg(WARN, 'Cannot find title with scholarly!')
+				msg(VERB, 'Possible titles:')
+				for pt in possible_titles[0:POSSIBLE_TITLES_PRINT_NUM]:
+					msg(VERB, '\t', pt)
+			return None
+		
+		return bs2, b2_url
+		
+	########
+	
+	bs2 = search_over_crossref_org()
+	if not bs2:
+		bs2, b2_url = search_over_scholarly()
+	if not bs2:
+		# Nothing found.
 		return bs1
-
-	r2 = requests.get(
-		'http://api.crossref.org/works/' + doi +
-		'/transform/application/x-bibtex'
-	)
-	if r2.status_code != 200:
-		intro()
-		msg(ERROR, r2.status_code)
-		msg(ERROR, r2.url)
-		return bs1
-
-	bs2 = r2.content.decode('utf-8')
+	
+	# Now have bs2.
+	
 	bd2t = bib.loads(bs2, create_parser())
 
 	bd2 = BibDatabase()
 	bd2.entries = [bd2t.entries[0]]
 	b2 = bd2.entries[0]
-
 	
 	if 'title' not in b2:
 		intro()
@@ -262,7 +316,14 @@ def update_bibtex_string(
 		msg(VERB, r1.url)
 		msg(VERB, r2.url)
 		return bs1
-
+	
+	# Filtering scholarly keys.
+	for unwanted_key in ['cites', 'gsrank', 'venue']:
+		if unwanted_key in b2:
+			del b2[unwanted_key]
+	
+	# Now have b2.
+	
 	if bid1:
 		b2['ID'] = bid1
 	else:
@@ -279,9 +340,12 @@ def update_bibtex_string(
 	link_to_url(b2)
 	if 'url' in b1:
 		b2['url'] = b1['url']
-	else:
+	elif 'url' in b2:
 		b2['url'] = b2['url'].replace('%2F', '/')
-
+	else:
+		b2['url'] = b2_url.replace('%2F', '/')
+	
+	
 	if b1 == b2:
 		# Nothing new.
 		return bs1
