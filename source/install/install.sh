@@ -43,6 +43,9 @@ else
 fi
 sudo apt install -y python3-bibtexparser python3-requests
 sudo pip3 install scholarly
+# Hack for old python3.5 dist-packages
+sudo pip3 install --ignore-installed lxml requests
+sudo pip3 install FreeProxy
 
 ###############################################################################
 # DB Browser for SQLite.

@@ -34,7 +34,7 @@ from bibtexparser.bibdatabase import BibDatabase
 import requests
 
 from scholarly import scholarly
-
+from fp.fp import FreeProxy
 
 ###############################################################################
 
@@ -57,6 +57,16 @@ special_words = [
 ]
 
 ###############################################################################
+
+__proxy = None
+def setup_proxy():
+	global __proxy
+	while True:
+		__proxy = FreeProxy(rand=True, timeout=1).get()
+		proxy_works = scholarly.use_proxy(http=__proxy, https=__proxy)
+		if proxy_works:
+			break
+	print("Working proxy:", __proxy)
 
 def parse_version(s):
 	a = s.split('.')
@@ -262,7 +272,11 @@ def update_bibtex_string(
 		return bs2
 
 	def search_over_scholarly():
-		query = scholarly.search_pubs(title)
+		while True:
+			query = scholarly.search_pubs(title)
+
+set_new_proxy()
+			
 		bs2 = None
 		b2_url = None
 		possible_titles = []
