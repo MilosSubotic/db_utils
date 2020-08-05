@@ -25,12 +25,14 @@ MAJOR=`echo $R | sed -n 's/^Release:[\t ]*\([0-9]\+\)\.\([0-9]\+\)$/\1/p'`
 
 if (( $MAJOR <= 16 ))
 then
-	# New python3.
+	# Newer python3 for scholarly to work.
 	sudo add-apt-repository -y ppa:deadsnakes/ppa
 	sudo apt update
 	sudo apt install -y python3.7
 	sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.5 5
 	sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 7
+	# Patch for gnome-terminal to work on Python3.7
+	sudo ln -s /usr/lib/python3/dist-packages/gi/_gi.cpython-{35m,37m}-x86_64-linux-gnu.so
 	# pip
 	sudo apt install -y python3.7-distutils
 	wget https://bootstrap.pypa.io/get-pip.py
