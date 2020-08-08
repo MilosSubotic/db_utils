@@ -59,12 +59,12 @@ not_to_be_capitalized = [
 ]
 special_words = [
 	#FIXME Correct this list for new capitalize().
-	'2D', '2-D', '3D', '3-D', 'FDTD', '(FDTD)',
-	'EC', '(EC)', 'openEMS', 'openEMS--a',
-	'GHz', 'TM', 'TE', 'GA', 'PSO', 'Lorentzian', 'Debye', 'Born',
-	'CMA-ES', '(CMA-ES)',
-	'PML', '(CPML):', 'CFS-PML',
-	'EMC/EMI',
+	'D',
+	'FDTD', 'EC', 'openEMS',
+	'PML', 'CPML', 'CFS',
+	'GHz', 'TM', 'TE',
+	'CMA', 'ES', 'GA', 'PSO',
+	'EMC', 'EMI',
 	'CPU', 'GPU', 'FPGA', 'GPR', 'IRAM'
 ]
 
@@ -262,7 +262,7 @@ def capitalize(in_s):
 	return out_s
 
 def correct_author(t):
-	return capitalize(t).replace(' And ', ' and ')\
+	return capitalize(t)\
 		.replace('Van Den Berg', 'van den Berg')\
 		.replace(u'ö', '{\\"o}')\
 		.replace(u'ü', '{\\"u}')\
