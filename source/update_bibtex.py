@@ -41,19 +41,26 @@ from fp.fp import FreeProxy
 #POSSIBLE_TITLES_PRINT_NUM = 1 # Just first
 POSSIBLE_TITLES_PRINT_NUM = 1000000 # All
 
+unwanted_bib_keys = ['cites', 'gsrank', 'venue', 'eprint', 'abstract']
+
 #TODO Nicer
 titles_to_ignore = [
 	'A Frequency-hopping Approach For Microwave Imaging Of Large Inhomogeneous Bodies',
 	'Adaptive Coordinate Descent'
 ]
+
+not_to_be_capitalized = [
+	'a', 'an', 'and', 'as', 'at', 'but', 'by', 'for', 'in',
+	'nor', 'of', 'on', 'or', 'the', 'to', 'up'
+]
 special_words = [
 	'2D', '2-D', '3D', '3-D', 'FDTD', '(FDTD)',
 	'EC', '(EC)', 'openEMS', 'openEMS--a',
-	'FPGA', 'GPU',
 	'GHz', 'TM', 'TE', 'GA', 'PSO', 'Lorentzian', 'Debye', 'Born',
 	'CMA-ES', '(CMA-ES)',
 	'PML', '(CPML):', 'CFS-PML',
-	'EMC/EMI', 'GPR'
+	'EMC/EMI',
+	'CPU', 'GPU', 'FPGA', 'GPR', 'IRAM'
 ]
 
 ###############################################################################
@@ -63,21 +70,21 @@ __proxy = None
 def __find_new_proxy():
 	global __proxy
 	while True:
-		__proxy = FreeProxy(rand=True, timeout=1).get()
-		proxy_works = scholarly.use_proxy(http=__proxy, https=__proxy)
+		__proxy = FreeProxy(rand = True, timeout = 1).get()
+		proxy_works = scholarly.use_proxy(http = __proxy, https = __proxy)
 		if proxy_works:
 			break
-	msg(VERB, "Working proxy:", __proxy)
+	msg(VERB, 'Working proxy: ', __proxy)
 	
 def try_new_proxy():
-	msg(VERB, "Trying new proxy...")
+	msg(VERB, 'Trying new proxy...')
 	__find_new_proxy()
 	
 def init_proxy():
 	global __proxy
 	# Init proxy only if it is not already initialized.
 	if not __proxy:
-		msg(VERB, "Initializing proxy...")
+		msg(VERB, 'Initializing proxy...')
 		__find_new_proxy()
 
 ###############################################################################
@@ -127,39 +134,95 @@ def diff_bibs(b1, b2):
 		else:
 			raise AssertError('Cannot be here!')
 
-#TODO Better.
-def titlize(s):
-	w = []
-	for t in s.split(' '):
-		upcase = sum(1 for c in t if c.isupper())
-		alpha = sum(1 for c in t if c.isalpha())
-		dots = sum(1 for c in t if c == '.')
-		if alpha != dots:
-			# Not initials.
-			if upcase == alpha:
-				# All uppcase.
-				w.append(t.capitalize())
+def capitalize(in_s):
+	words = list(in_s.split(' '))
+	def is_word_upcase(w):
+		# Word upcase = all letters upcase.
+		for c in w:
+			if c.isalpha():
+				if not c.isupper():
+					return False
+		return True
+	def is_word_capitalized(w):
+		return w.capitalize() == w
+	def is_word_special(w):
+		lw = w.lower()
+		for sw in special_words:
+			if lw == sw.lower():
+				return True
+		return False
+	def get_special(w):
+		lw = w.lower()
+		for sw in special_words:
+			if lw == sw.lower():
+				return sw
+		return None
+	
+	upcase = [is_word_upcase(w) for w in words]
+	all_upcase = all(upcase)
+	capitalized = [is_word_capitalized(w) for w in words]
+	special = [is_word_special(w) for w in words]
+	out_words = []
+	
+	for i in range(len(words)):
+		w = words[i]
+		u = upcase[i]
+		c = capitalized[i]
+		s = special[i]
+		if s: # Special word.
+			out_words.append('{' + get_special(w) + '}')
+		elif u: # Upper word.
+			if all_upcase:
+				# Make all capitalize and hope we do not have any upcase word.
+				if w.lower() in not_to_be_capitalized:
+					if i == 0 or i == len(words)-1: # First or last.
+						# Capitalize them no matter
+						# if they are in not_to_be_capitalized.
+						out_words.append(w.capitalize())
+					else:
+						out_words.append(w.lower())
+				else:
+					out_words.append(w.capitalize())
 			else:
-				w.append(t[0].upper() + t[1:])
-		else:
-			w.append(t)
-	s = ' '.join(w)
-	return s
+				if w.lower() in not_to_be_capitalized:
+					msg(WARN, f'Word "{w}" was not lower!')
+					if i == 0 or i == len(words)-1: # First or last.
+						# Capitalize them no matter
+						# if they are in not_to_be_capitalized.
+						out_words.append(w.capitalize())
+					else:
+						out_words.append(w.lower())
+				else:
+					# At this point it is not in special words, so:
+					msg(WARN, f'Maybe add "{w}" to the special words!')
+					out_words.append('{' + w + '}')
+		elif c: # Capitalized.
+			if w.lower() in not_to_be_capitalized:
+				msg(WARN, f'Word "{w}" was not lower!')
+				if i == 0 or i == len(words)-1: # First or last.
+					# Capitalize them no matter
+					# if they are in not_to_be_capitalized.
+					out_words.append(w)
+				else:
+					out_words.append(w.lower())
+			else:
+				out_words.append(w)
+		else: # Lower word.
+			if w in not_to_be_capitalized:
+				if i == 0 or i == len(words)-1: # First or last.
+					# Capitalize them no matter
+					# if they are in not_to_be_capitalized.
+					out_words.append(w.capitalize())
+				else:
+					out_words.append(w)
+			else:
+				out_words.append(w.capitalize())
 
-def preserve_special_words(s):
-	w = []
-	for t in s.split(' '):
-		tl = t.lower()
-		for k in special_words:
-			if tl == k.lower():
-				t = '{' + k + '}'
-				break
-		w.append(t)
-	s = ' '.join(w)
-	return s
+	out_s = ' '.join(out_words)
+	return out_s
 
 def correct_author(t):
-	return titlize(t).replace(' And ', ' and ')\
+	return capitalize(t).replace(' And ', ' and ')\
 		.replace('Van Den Berg', 'van den Berg')\
 		.replace(u'ö', '{\\"o}')\
 		.replace(u'ü', '{\\"u}')\
@@ -181,20 +244,14 @@ def correct_title(t):
 		.replace(r'$\less$/title$\greater$', '')
 
 
-	#TODO Correct upcase titles.
 	t = t.replace('{', '').replace('}', '')
 
-	t =  titlize(t)
-
-	t = preserve_special_words(t)
+	t = capitalize(t)
 
 	return t
 
-def prep_title(t):
-	return correct_title(t.lower().replace('{', '').replace('}', ''))
-
 def eq_titles(t1, t2):
-	return prep_title(t1) == prep_title(t2)
+	return correct_title(t1.lower()) == correct_title(t2.lower())
 
 
 def update_bibtex_string(
@@ -294,6 +351,7 @@ def update_bibtex_string(
 				query = scholarly.search_pubs(title)
 				break
 			except Exception as e:
+				print(e)
 				try_new_proxy()
 		
 		bs2 = None
@@ -350,8 +408,7 @@ def update_bibtex_string(
 		msg(VERB, r2.url)
 		return bs1
 	
-	# Filtering scholarly keys.
-	for unwanted_key in ['cites', 'gsrank', 'venue']:
+	for unwanted_key in unwanted_bib_keys:
 		if unwanted_key in b2:
 			del b2[unwanted_key]
 	
@@ -477,5 +534,5 @@ if __name__ == '__main__':
 			args.entry_or_range_start[0],
 			args.entry_or_range_start[0]
 		)
-
+	
 ###############################################################################
