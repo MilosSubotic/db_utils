@@ -57,16 +57,30 @@ special_words = [
 ]
 
 ###############################################################################
+# Proxy for scholarly.
 
 __proxy = None
-def setup_proxy():
+def __find_new_proxy():
 	global __proxy
 	while True:
 		__proxy = FreeProxy(rand=True, timeout=1).get()
 		proxy_works = scholarly.use_proxy(http=__proxy, https=__proxy)
 		if proxy_works:
 			break
-	print("Working proxy:", __proxy)
+	msg(VERB, "Working proxy:", __proxy)
+	
+def try_new_proxy():
+	msg(VERB, "Trying new proxy...")
+	__find_new_proxy()
+	
+def init_proxy():
+	global __proxy
+	# Init proxy only if it is not already initialized.
+	if not __proxy:
+		msg(VERB, "Initializing proxy...")
+		__find_new_proxy()
+
+###############################################################################
 
 def parse_version(s):
 	a = s.split('.')
@@ -272,11 +286,16 @@ def update_bibtex_string(
 		return bs2
 
 	def search_over_scholarly():
+		init_proxy()
+		#FIXME Nicer?
+		query = None
 		while True:
-			query = scholarly.search_pubs(title)
-
-set_new_proxy()
-			
+			try:
+				query = scholarly.search_pubs(title)
+				break
+			except Exception as e:
+				try_new_proxy()
+		
 		bs2 = None
 		b2_url = None
 		possible_titles = []
