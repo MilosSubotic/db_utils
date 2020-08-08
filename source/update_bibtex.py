@@ -41,6 +41,10 @@ from fp.fp import FreeProxy
 #POSSIBLE_TITLES_PRINT_NUM = 1 # Just first
 POSSIBLE_TITLES_PRINT_NUM = 1000000 # All
 
+en_crossref_org = True
+en_scholarly = False
+en_proxy = False
+
 unwanted_bib_keys = ['cites', 'gsrank', 'venue', 'eprint', 'abstract']
 
 #TODO Nicer
@@ -77,15 +81,17 @@ def __find_new_proxy():
 	msg(VERB, 'Working proxy: ', __proxy)
 	
 def try_new_proxy():
-	msg(VERB, 'Trying new proxy...')
-	__find_new_proxy()
+	if en_proxy:
+		msg(VERB, 'Trying new proxy...')
+		__find_new_proxy()
 	
 def init_proxy():
-	global __proxy
-	# Init proxy only if it is not already initialized.
-	if not __proxy:
-		msg(VERB, 'Initializing proxy...')
-		__find_new_proxy()
+	if en_proxy:
+		global __proxy
+		# Init proxy only if it is not already initialized.
+		if not __proxy:
+			msg(VERB, 'Initializing proxy...')
+			__find_new_proxy()
 
 ###############################################################################
 
@@ -138,11 +144,13 @@ def capitalize(in_s):
 	words = list(in_s.split(' '))
 	def is_word_upcase(w):
 		# Word upcase = all letters upcase.
+		any_alpha = False
 		for c in w:
 			if c.isalpha():
+				any_alpha = True
 				if not c.isupper():
 					return False
-		return True
+		return any_alpha
 	def is_word_capitalized(w):
 		return w.capitalize() == w
 	def is_word_special(w):
@@ -351,7 +359,6 @@ def update_bibtex_string(
 				query = scholarly.search_pubs(title)
 				break
 			except Exception as e:
-				print(e)
 				try_new_proxy()
 		
 		bs2 = None
@@ -379,15 +386,19 @@ def update_bibtex_string(
 				msg(VERB, 'Possible titles:')
 				for pt in possible_titles[0:POSSIBLE_TITLES_PRINT_NUM]:
 					msg(VERB, '\t', pt)
-			return None
 		
 		return bs2, b2_url
 		
 	########
 	
-	bs2 = search_over_crossref_org()
-	if not bs2:
-		bs2, b2_url = search_over_scholarly()
+	bs2 = None
+	b2_url = None
+	if en_crossref_org:
+		if not bs2:
+			bs2 = search_over_crossref_org()
+	if en_scholarly:
+		if not bs2:
+			bs2, b2_url = search_over_scholarly()
 	if not bs2:
 		# Nothing found.
 		return bs1
