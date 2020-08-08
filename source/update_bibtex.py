@@ -59,7 +59,6 @@ not_to_be_capitalized = [
 ]
 special_words = [
 	#FIXME Correct this list for new capitalize().
-	'D',
 	'FDTD', 'EC', 'openEMS',
 	'PML', 'CPML', 'CFS',
 	'GHz', 'TM', 'TE',
@@ -231,8 +230,9 @@ def capitalize(in_s):
 					else:
 						out_words.append(w.lower())
 				else:
-					# At this point it is not in special words, so:
-					msg(WARN, f'Maybe add "{w}" to the special words!')
+					if len(w) != 1: # No need to warn on single letter stuff.
+						# At this point it is not in special words, so:
+						msg(WARN, f'Maybe add "{w}" to the special words!')
 					out_words.append('{' + w + '}')
 		elif c: # Capitalized.
 			if w.lower() in not_to_be_capitalized:
