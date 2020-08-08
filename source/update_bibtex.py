@@ -58,6 +58,7 @@ not_to_be_capitalized = [
 	'nor', 'of', 'on', 'or', 'the', 'to', 'up'
 ]
 special_words = [
+	#FIXME Correct this list for new capitalize().
 	'2D', '2-D', '3D', '3-D', 'FDTD', '(FDTD)',
 	'EC', '(EC)', 'openEMS', 'openEMS--a',
 	'GHz', 'TM', 'TE', 'GA', 'PSO', 'Lorentzian', 'Debye', 'Born',
@@ -141,7 +142,36 @@ def diff_bibs(b1, b2):
 			raise AssertError('Cannot be here!')
 
 def capitalize(in_s):
-	words = list(in_s.split(' '))
+	#words = list(in_s.split(' '))
+	words = []
+	splits = []
+	# 0 - word, 1 - splits
+	state = 0
+	w = ''
+	s = ''
+	for c in in_s:
+		if state == 0:
+			if c.isalpha() or c.isdigit():
+				state = 0
+				w += c
+			else:
+				state = 1
+				s += c
+				words.append(w)
+				w = ''
+		else:
+			if c.isalpha() or c.isdigit():
+				state = 0
+				w += c
+				splits.append(s)
+				s = ''
+			else:
+				state = 1
+				s += c
+	words.append(w)
+	splits.append(s)
+	assert(len(words) == len(splits))
+	
 	def is_word_upcase(w):
 		# Word upcase = all letters upcase.
 		any_alpha = False
@@ -226,7 +256,9 @@ def capitalize(in_s):
 			else:
 				out_words.append(w.capitalize())
 
-	out_s = ' '.join(out_words)
+	out_s = ''
+	for w, s in zip(out_words, splits):
+		out_s += w + s
 	return out_s
 
 def correct_author(t):
