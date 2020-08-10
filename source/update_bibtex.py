@@ -231,12 +231,12 @@ def capitalize(in_s, title_not_authors = True):
 			else:
 				if w.lower() in not_to_be_capitalized:
 					if title_not_authors:
-						msg(WARN, f'Word "{w}" was not lower!')
 						if i == 0 or i == len(words)-1: # First or last.
 							# Capitalize them no matter
 							# if they are in not_to_be_capitalized.
 							out_words.append(w.capitalize())
 						else:
+							msg(WARN, f'Word "{w}" was not lower!')
 							out_words.append(w.lower())
 					else:
 						out_words.append(w)
