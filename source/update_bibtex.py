@@ -63,7 +63,7 @@ special_words = [
 	'PML', 'CPML', 'CFS',
 	'GHz', 'TM', 'TE',
 	'CMA', 'ES', 'GA', 'PSO',
-	'EMC', 'EMI',
+	'UWB', 'EMC', 'EMI',
 	'CPU', 'GPU', 'FPGA', 'GPR', 'RAM', 'IRAM', 'VLSI',
 	'others' #FIXME Bad if occurs in title.
 ]
