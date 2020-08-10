@@ -463,8 +463,13 @@ def update_bibtex_string(
 			bs2, b2_url = search_over_scholarly()
 	if not bs2:
 		# Nothing found.
-		# Still, do some processing on existing bibtex.
-		bs2 = bs1
+		if bs1:
+			# It is update.
+			# Still, do some processing on existing bibtex.
+			bs2 = bs1
+		else:
+			# It is insert.
+			return bs1
 	
 	# Now have bs2.
 	
