@@ -58,6 +58,7 @@ not_to_be_capitalized = [
 	'nor', 'of', 'on', 'or', 'the', 'to', 'up'
 ]
 special_words = [
+	'2D', '3D',
 	'FDTD', 'EC', 'openEMS', 'FBTS',
 	'PML', 'CPML', 'CFS',
 	'GHz', 'TM', 'TE',
