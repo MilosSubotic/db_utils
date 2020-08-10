@@ -58,7 +58,7 @@ not_to_be_capitalized = [
 	'nor', 'of', 'on', 'or', 'the', 'to', 'up'
 ]
 special_words = [
-	'FDTD', 'EC', 'openEMS',
+	'FDTD', 'EC', 'openEMS', 'FBTS',
 	'PML', 'CPML', 'CFS',
 	'GHz', 'TM', 'TE',
 	'CMA', 'ES', 'GA', 'PSO',
