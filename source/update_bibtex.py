@@ -64,7 +64,7 @@ special_words = [
 	'GHz', 'TM', 'TE',
 	'CMA', 'ES', 'GA', 'PSO',
 	'EMC', 'EMI',
-	'CPU', 'GPU', 'FPGA', 'GPR', 'IRAM'
+	'CPU', 'GPU', 'FPGA', 'GPR', 'RAM', 'IRAM'
 ]
 
 ###############################################################################
@@ -140,7 +140,7 @@ def diff_bibs(b1, b2):
 		else:
 			raise AssertError('Cannot be here!')
 
-def capitalize(in_s):
+def capitalize(in_s, title_not_authors = True):
 	#words = list(in_s.split(' '))
 	words = []
 	splits = []
@@ -167,9 +167,14 @@ def capitalize(in_s):
 			else:
 				state = 1
 				s += c
+	# Flush.
 	words.append(w)
 	splits.append(s)
-	assert(len(words) == len(splits))
+	# To have them even.
+	if len(words) > len(splits):
+		splits.append('')
+	elif len(words) < len(splits):
+		words.append('')
 	
 	def is_word_upcase(w):
 		# Word upcase = all letters upcase.
@@ -212,45 +217,64 @@ def capitalize(in_s):
 			if all_upcase:
 				# Make all capitalize and hope we do not have any upcase word.
 				if w.lower() in not_to_be_capitalized:
-					if i == 0 or i == len(words)-1: # First or last.
-						# Capitalize them no matter
-						# if they are in not_to_be_capitalized.
-						out_words.append(w.capitalize())
+					if title_not_authors:
+						if i == 0 or i == len(words)-1: # First or last.
+							# Capitalize them no matter
+							# if they are in not_to_be_capitalized.
+							out_words.append(w.capitalize())
+						else:
+							out_words.append(w.lower())
 					else:
-						out_words.append(w.lower())
+						out_words.append(w)
 				else:
 					out_words.append(w.capitalize())
 			else:
 				if w.lower() in not_to_be_capitalized:
+					if title_not_authors:
+						msg(WARN, f'Word "{w}" was not lower!')
+						if i == 0 or i == len(words)-1: # First or last.
+							# Capitalize them no matter
+							# if they are in not_to_be_capitalized.
+							out_words.append(w.capitalize())
+						else:
+							out_words.append(w.lower())
+					else:
+						out_words.append(w)
+				else:
+					if len(w) != 1: # No need to warn on single letter stuff.
+						# At this point it is not in special words, so:
+						msg(WARN, f'Maybe add "{w}" to the special words!')
+					if title_not_authors:
+						out_words.append('{' + w + '}')
+					else:
+						if len(w) == 1:
+							out_words.append(w)
+						else:
+							# Kind a strange.
+							out_words.append('{' + w + '}')
+		elif c: # Capitalized.
+			if w.lower() in not_to_be_capitalized:
+				if title_not_authors:
 					msg(WARN, f'Word "{w}" was not lower!')
+					if i == 0 or i == len(words)-1: # First or last.
+						# Capitalize them no matter
+						# if they are in not_to_be_capitalized.
+						out_words.append(w)
+					else:
+						out_words.append(w.lower())
+				else:
+					out_words.append(w)
+			else:
+				out_words.append(w)
+		else: # Lower word.
+			if w in not_to_be_capitalized:
+				if title_not_authors:
 					if i == 0 or i == len(words)-1: # First or last.
 						# Capitalize them no matter
 						# if they are in not_to_be_capitalized.
 						out_words.append(w.capitalize())
 					else:
-						out_words.append(w.lower())
-				else:
-					if len(w) != 1: # No need to warn on single letter stuff.
-						# At this point it is not in special words, so:
-						msg(WARN, f'Maybe add "{w}" to the special words!')
-					out_words.append('{' + w + '}')
-		elif c: # Capitalized.
-			if w.lower() in not_to_be_capitalized:
-				msg(WARN, f'Word "{w}" was not lower!')
-				if i == 0 or i == len(words)-1: # First or last.
-					# Capitalize them no matter
-					# if they are in not_to_be_capitalized.
-					out_words.append(w)
-				else:
-					out_words.append(w.lower())
-			else:
-				out_words.append(w)
-		else: # Lower word.
-			if w in not_to_be_capitalized:
-				if i == 0 or i == len(words)-1: # First or last.
-					# Capitalize them no matter
-					# if they are in not_to_be_capitalized.
-					out_words.append(w.capitalize())
+						out_words.append(w)
 				else:
 					out_words.append(w)
 			else:
@@ -262,10 +286,16 @@ def capitalize(in_s):
 	return out_s
 
 def correct_author(t):
-	return capitalize(t)\
-		.replace('Van Den Berg', 'van den Berg')\
-		.replace(u'ö', '{\\"o}')\
+	t = t.replace(u'ö', '{\\"o}')\
 		.replace(u'ü', '{\\"u}')\
+		
+	t = t.replace('{', '').replace('}', '')
+	
+	t = capitalize(t, False)
+	
+	t = t.replace('Van Den Berg', 'van den Berg')
+	
+	return t
 
 
 def correct_title(t):
@@ -433,7 +463,8 @@ def update_bibtex_string(
 			bs2, b2_url = search_over_scholarly()
 	if not bs2:
 		# Nothing found.
-		return bs1
+		# Still, do some processing on existing bibtex.
+		bs2 = bs1
 	
 	# Now have bs2.
 	
@@ -475,8 +506,10 @@ def update_bibtex_string(
 		b2['url'] = b1['url']
 	elif 'url' in b2:
 		b2['url'] = b2['url'].replace('%2F', '/')
-	else:
+	elif b2_url:
 		b2['url'] = b2_url.replace('%2F', '/')
+	else:
+		msg(WARN, 'No URL!')
 	
 	
 	if b1 == b2:
