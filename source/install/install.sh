@@ -50,11 +50,13 @@ sudo pip3 install FreeProxy
 ###############################################################################
 # DB Browser for SQLite.
 
-sudo apt install -y git build-essential cmake libqt4-dev libsqlite3-dev
+sudo apt install -y git build-essential cmake libsqlite3-dev libsqlcipher-dev
+sudo apt install -y qt5-default qttools5-dev-tools \
+	qtbase5-dev libqt5scintilla2-dev libqcustomplot-dev qttools5-dev
 git clone https://github.com/MilosSubotic/sqlitebrowser
 pushd sqlitebrowser
-git checkout file_name_stuff
-cmake .
+git checkout file_name_stuff_qt5
+cmake -Dsqlcipher=1 -Wno-dev .
 make -j4
 sudo make install
 popd
