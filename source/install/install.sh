@@ -4,8 +4,8 @@
 
 I=`dirname "${BASH_SOURCE[0]}"`
 P="`cd "$I/.." >/dev/null 2>&1 && pwd`"
-echo "export PATH=\$PATH:$P" >> ~/.bashrc
-
+echo "export PATH=\$PATH:$P" >> ~/.profile
+exit 0
 ###############################################################################
 # Check is this Ubuntu.
 
