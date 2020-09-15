@@ -59,10 +59,10 @@ not_to_be_capitalized = [
 ]
 special_words = [
 	'2D', '3D',
-	'FDTD', 'EC', 'openEMS', 'FBTS',
+	'EM', 'FDTD', 'EC', 'openEMS', 'FBTS',
 	'PML', 'CPML', 'CFS',
-	'GHz', 'TM', 'TE',
-	'CMA', 'ES', 'GA', 'PSO',
+	'GHz', 'TM', 'TE', 'RF',
+	'CMA', 'ES', 'GA', 'PSO', 'ABC',
 	'UWB', 'EMC', 'EMI',
 	'CPU', 'GPU', 'FPGA', 'GPR', 'RAM', 'IRAM', 'VLSI',
 	'others' #FIXME Bad if occurs in title.
@@ -334,6 +334,8 @@ def update_bibtex_string(
 	bid1,
 	bs1
 ):
+	msg(VERBOSE, '')
+	
 	if bs1:
 		# Update existing BibTeX.
 		bd1 = bib.loads(bs1, create_parser())
@@ -350,11 +352,9 @@ def update_bibtex_string(
 
 	def intro():
 		if bs1:
-			msg(INFO, )
 			msg(INFO, i, ' update:')
 			msg(INFO, title)
 		else:
-			msg(DEBUG, )
 			msg(DEBUG, i, ' insert:')
 			msg(DEBUG, title)
 
