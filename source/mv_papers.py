@@ -80,24 +80,25 @@ def fill_db(src, dst):
 		'`File`' : file_field
 	}
 	because_it_cited_field = None
-	reason = splited_src_dir[-2]
-	d1 = splited_src_dir[-1]
-	if reason == 'kw':
-		new_fields['`Search_keywords`'] = d1
-		new_fields['`Where_searched`'] = 'Google Scholar'
-		s = d1.split(' - ')
-		if len(s) >= 2:
-			ws = s[-1]
-			sk = ' - '.join(s[0:-1])
-			if ws in ['google.com', 'Wiki']:
-				new_fields['`Where_searched`'] = ws
-				new_fields['`Search_keywords`'] = sk
-	elif reason == 'ref' or reason == 'refs':
-		new_fields['`Reference_from`'] = d1
-	elif reason == 'cites':
-		new_fields['`Because_it_cited`'] = d1
-	else:
-		reason = None
+	if len(splited_src_dir) >= 2:
+		reason = splited_src_dir[-2]
+		d1 = splited_src_dir[-1]
+		if reason == 'kw':
+			new_fields['`Search_keywords`'] = d1
+			new_fields['`Where_searched`'] = 'Google Scholar'
+			s = d1.split(' - ')
+			if len(s) >= 2:
+				ws = s[-1]
+				sk = ' - '.join(s[0:-1])
+				if ws in ['google.com', 'Wiki']:
+					new_fields['`Where_searched`'] = ws
+					new_fields['`Search_keywords`'] = sk
+		elif reason == 'ref' or reason == 'refs':
+			new_fields['`Reference_from`'] = d1
+		elif reason == 'cites':
+			new_fields['`Because_it_cited`'] = d1
+		else:
+			reason = None
 
 	con = sqlite3.connect(db_file)
 	cur = con.cursor()
