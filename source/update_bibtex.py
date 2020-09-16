@@ -334,7 +334,7 @@ def update_bibtex_string(
 	bid1,
 	bs1
 ):
-	msg(VERBOSE, '')
+	msg(VERB, '')
 	
 	if bs1:
 		# Update existing BibTeX.
