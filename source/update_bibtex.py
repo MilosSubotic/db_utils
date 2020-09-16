@@ -2,8 +2,7 @@
 # -*- coding: utf-8 -*-
 
 '''
-Create/update `BibTeX` in database with crossref.org online version.
-Counting start from 1.
+Create/update `BibTeX` in database with online version.
 '''
 
 #TODO Remove \textquotesingle from others fields too.
@@ -41,10 +40,6 @@ from fp.fp import FreeProxy
 #POSSIBLE_TITLES_PRINT_NUM = 1 # Just first
 POSSIBLE_TITLES_PRINT_NUM = 1000000 # All
 
-en_crossref_org = True
-en_scholarly = False
-en_proxy = False
-
 unwanted_bib_keys = ['cites', 'gsrank', 'venue', 'eprint', 'abstract']
 
 #TODO Nicer
@@ -69,6 +64,11 @@ special_words = [
 ]
 
 ###############################################################################
+
+class Flags:
+	pass
+
+###############################################################################
 # Proxy for scholarly.
 
 __proxy = None
@@ -82,17 +82,15 @@ def __find_new_proxy():
 	msg(VERB, 'Working proxy: ', __proxy)
 	
 def try_new_proxy():
-	if en_proxy:
-		msg(VERB, 'Trying new proxy...')
-		__find_new_proxy()
+	msg(VERB, 'Trying new proxy...')
+	__find_new_proxy()
 	
 def init_proxy():
-	if en_proxy:
-		global __proxy
-		# Init proxy only if it is not already initialized.
-		if not __proxy:
-			msg(VERB, 'Initializing proxy...')
-			__find_new_proxy()
+	global __proxy
+	# Init proxy only if it is not already initialized.
+	if not __proxy:
+		msg(VERB, 'Initializing proxy...')
+		__find_new_proxy()
 
 ###############################################################################
 
@@ -328,7 +326,7 @@ def eq_titles(t1, t2):
 
 
 def update_bibtex_string(
-	ignore_miss,
+	flags,
 	i,
 	title,
 	bid1,
@@ -393,7 +391,7 @@ def update_bibtex_string(
 					break
 
 		if not doi:
-			if not ignore_miss:
+			if not flags.ignore_miss:
 				intro()
 				msg(WARN, 'Cannot find title over crossref.org!')
 				msg(VERB, 'url: ', r1.url)
@@ -416,18 +414,28 @@ def update_bibtex_string(
 		return bs2
 
 	def search_over_scholarly():
-		init_proxy()
-		#FIXME Nicer?
-		query = None
-		while True:
-			try:
-				query = scholarly.search_pubs(title)
-				break
-			except Exception as e:
-				try_new_proxy()
-		
 		bs2 = None
 		b2_url = None
+		
+		query = None
+		if flags.en_scholarly_proxy:
+			init_proxy()
+			#FIXME Nicer?
+			#TODO Number of trials.
+			while True:
+				try:
+					query = scholarly.search_pubs(title)
+					break
+				except Exception as e:
+					try_new_proxy()
+		else:
+			try:
+				query = scholarly.search_pubs(title)
+			except Exception as e:
+				intro()
+				msg(WARN, 'Cannot connect with scholarly!')
+				return bs2, b2_url
+		
 		possible_titles = []
 		for i, pub in enumerate(query):
 			if i == 1:
@@ -445,7 +453,7 @@ def update_bibtex_string(
 				pass
 		
 		if not bs2:
-			if not ignore_miss:
+			if not flags.ignore_miss:
 				intro()
 				msg(WARN, 'Cannot find title with scholarly!')
 				msg(VERB, 'Possible titles:')
@@ -458,10 +466,10 @@ def update_bibtex_string(
 	
 	bs2 = None
 	b2_url = None
-	if en_crossref_org:
+	if flags.en_crossref_org:
 		if not bs2:
 			bs2 = search_over_crossref_org()
-	if en_scholarly:
+	if flags.en_scholarly:
 		if not bs2:
 			bs2, b2_url = search_over_scholarly()
 	if not bs2:
@@ -534,7 +542,7 @@ def update_bibtex_string(
 	return bs2
 
 
-def update_bibtex_range(ignore_miss, range_start, range_end):
+def update_bibtex_range(flags, range_start, range_end):
 	print('Creating/updating BibTeX in DB file: ', db_file)
 
 	con = sqlite3.connect(db_file)
@@ -563,7 +571,7 @@ def update_bibtex_range(ignore_miss, range_start, range_end):
 	for idx in r:
 		i = idx + 1
 		bibtexes[idx] = update_bibtex_string(
-			ignore_miss,
+			flags,
 			i,
 			titles[idx],
 			bibtexe_ids[idx],
@@ -591,6 +599,24 @@ if __name__ == '__main__':
 		help = 'Ignore and do not report misses (Cannot find title)'
 	)
 	parser.add_argument(
+		'--dis-crossref-org',
+		dest = 'en_crossref_org',
+		action = 'store_false',
+		help = 'Disable searching on Crossref.org'
+	)
+	parser.add_argument(
+		'--en-scholarly',
+		dest = 'en_scholarly',
+		action = 'store_true',
+		help = 'Enable searching with Scholarly'
+	)
+	parser.add_argument(
+		'--en-scholarly-proxy',
+		dest = 'en_scholarly_proxy',
+		action = 'store_true',
+		help = 'Enable proxy for Scholarly'
+	)
+	parser.add_argument(
 		'entry_or_range_start',
 		metavar = 'entry_or_range_start',
 		type = int,
@@ -605,16 +631,21 @@ if __name__ == '__main__':
 		help = 'range end including this one'
 	)
 	args = parser.parse_args()
-
+	
+	flags = Flags()
+	flags.ignore_miss = args.ignore_miss
+	flags.en_crossref_org = args.en_crossref_org
+	flags.en_scholarly = args.en_scholarly
+	flags.en_scholarly_proxy = args.en_scholarly_proxy
 	if args.range_end:
 		update_bibtex_range(
-			args.ignore_miss,
+			flags,
 			args.entry_or_range_start[0],
 			args.range_end
 		)
 	else:
 		update_bibtex_range(
-			args.ignore_miss,
+			flags,
 			args.entry_or_range_start[0],
 			args.entry_or_range_start[0]
 		)
