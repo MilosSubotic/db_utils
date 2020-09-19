@@ -57,9 +57,11 @@ special_words = [
 	'EM', 'FDTD', 'EC', 'openEMS', 'FBTS',
 	'PML', 'CPML', 'CFS',
 	'GHz', 'TM', 'TE', 'RF',
-	'CMA', 'ES', 'GA', 'PSO', 'ABC',
+	'RCS', 'SAR',
 	'UWB', 'EMC', 'EMI',
-	'CPU', 'GPU', 'FPGA', 'GPR', 'RAM', 'IRAM', 'VLSI',
+	'CMA', 'ES', 'GA', 'PSO', 'ABC',
+	'CPU', 'GPU', 'FPGA', 'GPR', 'RAM', 'IRAM', 'VLSI', 'ASIC', 'CMOS',
+	'ADC', 'DAC', 'GS',
 	'others' #FIXME Bad if occurs in title.
 ]
 
