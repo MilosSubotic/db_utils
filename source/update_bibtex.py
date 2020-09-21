@@ -324,7 +324,13 @@ def correct_title(t):
 	return t
 
 def eq_titles(t1, t2):
-	return correct_title(t1.lower()) == correct_title(t2.lower())
+	ct1 = correct_title(t1.lower())
+	ct2 = correct_title(t2.lower())
+	# For debug.
+	if False:
+		print('"{}"'.format(ct1))
+		print('"{}"'.format(ct2))
+	return ct1 == ct2
 
 
 def update_bibtex_string(
