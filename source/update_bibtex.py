@@ -62,6 +62,7 @@ special_words = [
 	'CMA', 'ES', 'GA', 'PSO', 'ABC',
 	'CPU', 'GPU', 'FPGA', 'GPR', 'RAM', 'IRAM', 'VLSI', 'ASIC', 'CMOS',
 	'ADC', 'DAC', 'GS',
+	'CT', 'MRI',
 	'others' #FIXME Bad if occurs in title.
 ]
 
