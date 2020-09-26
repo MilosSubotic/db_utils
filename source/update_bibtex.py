@@ -304,8 +304,7 @@ def correct_title(t):
 		.replace(r'{\&}{\#}x2013$\mathsemicolon$', '--')\
 		.replace(r'\textquotesingle', "'")\
 		.replace(r'\textasciigrave', "`")\
-		.replace(' - ', '--')\
-		.replace('–', '-')\
+		.replace('–', '--')\
 		.replace(r'\textendash', '-')
 	t = t.replace(r'{`}', '`')\
 		.replace(r"{'}", "'")
