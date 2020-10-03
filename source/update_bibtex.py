@@ -306,6 +306,7 @@ def correct_title(t):
 		.replace(r'\textquotesingle', "'")\
 		.replace(r'\textasciigrave', "`")\
 		.replace('–', '--')\
+		.replace('—', '---')\
 		.replace(r'\textendash', '-')
 	t = t.replace(r'{`}', '`')\
 		.replace(r"{'}", "'")
