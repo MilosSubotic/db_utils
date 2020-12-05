@@ -9,8 +9,8 @@ From `BibTeX` update other fields: `Title`, `Journal`, `Year`...
 
 from __future__ import print_function
 
-__author__	    = 'Milos Subotic'
-__email__	    = 'milos.subotic.sm@gmail.com'
+__author__      = 'Milos Subotic'
+__email__       = 'milos.subotic.sm@gmail.com'
 __copyright__   = 'MIT'
 
 ###############################################################################

@@ -9,8 +9,8 @@ Search and list papers from tree which are not in DB.
 
 from __future__ import print_function
 
-__author__	    = 'Stefan Maretic, Milos Subotic'
-__email__	    = 'milos.subotic.sm@gmail.com'
+__author__      = 'Stefan Maretic, Milos Subotic'
+__email__       = 'milos.subotic.sm@gmail.com'
 __copyright__   = 'MIT'
 
 ###############################################################################

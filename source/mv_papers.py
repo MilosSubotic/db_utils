@@ -9,8 +9,8 @@ Move files from hunt place to directory in tree and update DB.
 
 from __future__ import print_function
 
-__author__	    = 'Milos Subotic, Stefan Maretic'
-__email__	    = 'milos.subotic.sm@gmail.com'
+__author__      = 'Milos Subotic, Stefan Maretic'
+__email__       = 'milos.subotic.sm@gmail.com'
 __copyright__   = 'MIT'
 
 ###############################################################################
