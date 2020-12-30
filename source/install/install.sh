@@ -23,28 +23,17 @@ MAJOR=`echo $R | sed -n 's/^Release:[\t ]*\([0-9]\+\)\.\([0-9]\+\)$/\1/p'`
 ###############################################################################
 # For scripts.
 
-if (( $MAJOR <= 16 ))
+#TODO Test on Ubuntu 20.
+if (( $MAJOR < 20 ))
 then
-	# Newer python3 for scholarly to work.
-	sudo add-apt-repository -y ppa:deadsnakes/ppa
-	sudo apt update
-	sudo apt install -y python3.7
-	sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.5 5
-	sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 7
-	# Patch for gnome-terminal to work on Python3.7
-	sudo ln -s /usr/lib/python3/dist-packages/gi/_gi.cpython-{35m,37m}-x86_64-linux-gnu.so
-	# pip
-	sudo apt install -y python3.7-distutils
-	wget https://bootstrap.pypa.io/get-pip.py
-	sudo python3 get-pip.py
-	rm get-pip.py
-else
-	sudo apt install -y python3
+	echo "Not supported version of ubuntu!"
+	exit 1
 fi
+sudo apt install -y python3
 sudo apt install -y python3-bibtexparser python3-requests
 sudo pip3 install scholarly
 # Hack for old python3.5 dist-packages
-sudo pip3 install --ignore-installed lxml requests
+#TODO sudo pip3 install --ignore-installed lxml requests
 sudo pip3 install FreeProxy
 
 ###############################################################################
