@@ -89,3 +89,59 @@ select * from Papers
 	where `File` like 'RF/Probes/%';
 select * from Papers 
 	where `File` like 'RF/Tools/Probes/%';
+
+
+-- List columns.
+PRAGMA table_info(Papers);
+
+-- Change a columns a little bit.
+create table tmp_Papers (
+	`Index`	integer default 0,
+	`Title`	text not null unique,
+	`Subject_field`	text,
+	`BibTeX_ID`	text,
+	`BibTeX`	text,
+	`File`	text,
+	`Printed`	text,
+	`Read`	text,
+	`Observations_and_Conclusions`	text,
+	`TODO`	text,
+	`Interesting_keywords`	text,
+	`Interesting_author`	text,
+	`Why_interesting`	text,
+	`Journal_Conference_Other_Source`	text,
+	`Year`	integer,
+	`Where_searched`	text,
+	`Search_keywords`	text,
+	`Reference_from`	text,
+	`Reference_number`	text,
+	`Because_it_cited`	text,
+	`Other_source`	integer,
+	primary key(`Title`)
+);
+insert into tmp_Papers
+select
+	`Index`,
+	`Title`,
+	`Subject_field`,
+	`BibTeX_ID`,
+	`BibTeX`,
+	`File`,
+	`Printed`,
+	`Read`,
+	`Observations_and_Conclusions`,
+	`TODO`,
+	`Interesting_keywords`,
+	`Interesting_author`,
+	`Why_interesting`,
+	`Journal_Conference_Other_Source`,
+	`Year`,
+	`Where_searched`,
+	`Search_keywords`,
+	`Reference_from`,
+	`Reference_number`,
+	`Because_it_cited`,
+	`Other_source`
+from Papers;
+drop table Papers;
+alter table tmp_Papers rename to Papers;
