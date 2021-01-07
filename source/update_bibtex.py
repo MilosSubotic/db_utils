@@ -32,8 +32,7 @@ from bibtexparser.bibdatabase import BibDatabase
 
 import requests
 
-from scholarly import scholarly
-from fp.fp import FreeProxy
+from scholarly import scholarly, ProxyGenerator
 
 ###############################################################################
 
@@ -78,8 +77,9 @@ __proxy = None
 def __find_new_proxy():
 	global __proxy
 	while True:
-		__proxy = FreeProxy(rand = True, timeout = 1).get()
-		proxy_works = scholarly.use_proxy(http = __proxy, https = __proxy)
+		__proxy = ProxyGenerator()
+		__proxy.FreeProxies()
+		proxy_works = scholarly.use_proxy(__proxy)
 		if proxy_works:
 			break
 	msg(VERB, 'Working proxy: ', __proxy)
