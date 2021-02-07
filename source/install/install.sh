@@ -23,10 +23,9 @@ MAJOR=`echo $R | sed -n 's/^Release:[\t ]*\([0-9]\+\)\.\([0-9]\+\)$/\1/p'`
 ###############################################################################
 # For scripts.
 
-#TODO Test on Ubuntu 20.
 if (( $MAJOR < 20 ))
 then
-	echo "Not supported version of ubuntu!"
+	echo "Not supported version of Ubuntu!"
 	exit 1
 fi
 sudo apt -y install python3-bibtexparser python3-requests

@@ -450,15 +450,15 @@ def update_bibtex_string(
 			if i == 1:
 				break
 
-			t = pub.bib['title']
+			t = pub['bib']['title']
 			possible_titles.append(t)
 			if eq_titles(title, t):
 				if bs2:
 					intro()
 					msg(ERROR, 'Multiple same titles')
 				else:
-					bs2 = pub.bibtex
-					b2_url = pub.bib['url']
+					bs2 = scholarly.bibtex(pub)
+					b2_url = pub['pub_url']
 				pass
 		
 		if not bs2:
