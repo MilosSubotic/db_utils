@@ -145,3 +145,20 @@ select
 from Papers;
 drop table Papers;
 alter table tmp_Papers rename to Papers;
+
+
+-- Extract what to update.
+select (`Index`, `BibTeX`)
+	from Papers
+	where
+		`BibTeX_ID` in (
+			"Antenna.miniaturization.survey",
+			"Archimedian.spiral.EBG.metamaterial.backing"
+		)
+		and
+		(
+			`BibTeX` is NULL
+			or
+			`BibTeX` = ""
+		);
+	
