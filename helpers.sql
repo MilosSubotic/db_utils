@@ -148,7 +148,7 @@ alter table tmp_Papers rename to Papers;
 
 
 -- Extract what to update.
-select (`Index`, `BibTeX`)
+select `Index`, `BibTeX`
 	from Papers
 	where
 		`BibTeX_ID` in (
@@ -162,3 +162,8 @@ select (`Index`, `BibTeX`)
 			`BibTeX` = ""
 		);
 	
+
+-- List all possible interesting authors.
+select distinct `Interesting_author`
+from Papers
+order by `Interesting_author`;
