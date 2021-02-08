@@ -55,7 +55,7 @@ special_words = [
 	'2D', '3D',
 	'EM', 'FDTD', 'EC', 'openEMS', 'FBTS',
 	'PML', 'CPML', 'CFS',
-	'GHz', 'TM', 'TE', 'RF',
+	'GHz', 'TM', 'TE', 'RF', 'UHF',
 	'RCS', 'SAR',
 	'UWB', 'EMC', 'EMI',
 	'CMA', 'ES', 'GA', 'PSO', 'ABC',
@@ -307,7 +307,8 @@ def correct_title(t):
 		.replace(r'\textasciigrave', "`")\
 		.replace('–', '--')\
 		.replace('—', '---')\
-		.replace(r'\textendash', '-')
+		.replace(r'\textendash', '-')\
+		.replace(r'\textemdash', '--')
 	t = t.replace(r'{`}', '`')\
 		.replace(r"{'}", "'")
 	t = t.replace(r'`` ', '')\
