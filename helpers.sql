@@ -44,8 +44,9 @@ update Papers
 	set `Journal_Conference_Other_Source` = 'IEEE Transactions on Antennas and Propagation'
 	where `Journal_Conference_Other_Source` = 'Antennas and Propagation, IEEE Transactions on';
 
+
 -- Collect journals.
-insert into Journals (Name)
+insert into Journals (`Name`)
 	select distinct `Journal_Conference_Other_Source` from Papers 
 		where 
 			not (
@@ -71,7 +72,6 @@ insert into Journals (Name)
 			`Journal_Conference_Other_Source` not in (
 				select `Name` from Journals
 			);
-
 -- Update count.
 update Journals
 	set `Count_of_papers` = (
@@ -79,6 +79,47 @@ update Journals
 			from Papers
 			where `Journal_Conference_Other_Source` = Journals.`Name`
 	);
+
+
+-- Empty table.
+delete from Subjects;
+-- Collect Subjects.
+-- FIXME Cannot append new.
+-- FIXME Sorting.
+insert into Subjects (`Subject`)
+	with split(word, str) as (
+		--select '', 'MWT; FDTD; GA; NN'||';'
+		select '', `Subject_field`||';'
+			from Papers 
+			union all select
+				trim(substr(str, 0, instr(str, ';'))),
+				substr(str, instr(str, ';')+1)
+				from split
+				where str != ''
+	) select distinct word
+		from split
+		where word != ''
+		order by word asc;
+-- Update count.
+update Subjects
+	set `Count` = (
+		select count(`Index`)
+			from Papers
+			--where instr(`Subject_field`, Subjects.`Subject`) != 0
+			where exists(
+				with split(word, str) as (
+					select '', `Subject_field`||';'
+					union all select
+						trim(substr(str, 0, instr(str, ';'))),
+						substr(str, instr(str, ';')+1)
+						from split
+						where str != ''
+				) select 1
+					from split
+					where word = Subjects.`Subject`
+			)
+	);
+
 
 -- String operations on specific cells.
 update Papers 
