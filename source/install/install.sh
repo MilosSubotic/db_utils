@@ -5,7 +5,7 @@
 I=`dirname "${BASH_SOURCE[0]}"`
 P="`cd "$I/.." >/dev/null 2>&1 && pwd`"
 echo "export PATH=\$PATH:$P" >> ~/.profile
-exit 0
+
 ###############################################################################
 # Check is this Ubuntu.
 
@@ -25,6 +25,7 @@ MAJOR=`echo $R | sed -n 's/^Release:[\t ]*\([0-9]\+\)\.\([0-9]\+\)$/\1/p'`
 
 if (( $MAJOR < 20 ))
 then
+	# scholarly need Ubuntu 20
 	echo "Not supported version of Ubuntu!"
 	exit 1
 fi
@@ -46,5 +47,6 @@ cmake -Dsqlcipher=1 -Wno-dev ..
 make -j4
 sudo make install
 popd
+rm -rf sqlitebrowser
 
 ###############################################################################
