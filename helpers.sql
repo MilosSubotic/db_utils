@@ -208,3 +208,12 @@ select `Index`, `BibTeX`
 select distinct `Interesting_author`
 from Papers
 order by `Interesting_author`;
+
+
+-- BibTeX_ID not in BibTeX.
+select `BibTeX_ID`
+	from Papers
+	where
+		`BibTeX` like '@%{TODO_%'
+		and
+		not `BibTeX_ID` like 'TODO_%';
