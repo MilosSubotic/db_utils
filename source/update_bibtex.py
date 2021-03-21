@@ -564,7 +564,7 @@ def update_bibtex_range(flags, range_start, range_end):
 	t1 = cur.fetchall()
 	titles = [tt[0] for tt in t1]
 	bibtexes = [tt[1] for tt in t1]
-	bibtexe_ids = [tt[2] for tt in t1]
+	bibtex_ids = [tt[2] for tt in t1]
 
 	# Search range.
 	def entry_to_idx(entry):
@@ -586,7 +586,7 @@ def update_bibtex_range(flags, range_start, range_end):
 			flags,
 			i,
 			titles[idx],
-			bibtexe_ids[idx],
+			bibtex_ids[idx],
 			bibtexes[idx]
 		)
 
