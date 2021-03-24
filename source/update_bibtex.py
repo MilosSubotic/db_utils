@@ -53,16 +53,18 @@ not_to_be_capitalized = [
 ]
 special_words = [
 	'2D', '3D',
-	'EM', 'FDTD', 'EC', 'openEMS', 'FBTS',
-	'PML', 'CPML', 'CFS',
+	'EM', 'Maxwell', 'FDTD', 'EC', 'openEMS', 'FBTS',
+	'PML', 'CPML', 'CFS', 'Debye', 'Lorentz', 'Lorentzian',
 	'GHz', 'TM', 'TE', 'TEM', 'RF', 'UHF',
 	'RCS', 'SAR',
-	'UWB', 'EMC', 'EMI', 'MIMO',
-	'CMA', 'ES', 'GA', 'PSO', 'ABC',
-	'WCDA', 'TV',
-	'CPU', 'FPGA', 'GPR', 'RAM', 'IRAM', 'VLSI', 'ASIC', 'CMOS',
-	'GPU', 'CUDA',
-	'ADC', 'DAC', 'GS',
+	'UWB', 'EMC', 'EMI', 'MIMO', 'TR',
+	'Vivaldi',
+	'CMA', 'ES', 'GA', 'PSO', 'ABC', 'HJ', 'Hooke', 'Jeeves',
+	'Gauss', 'Newton', 'Lipschitz',
+	'Born', 'WCDA', 'TV',
+	'CPU', 'FPGA', 'DSP', 'GPR', 'RAM', 'IRAM', 'VLSI', 'ASIC', 'CMOS',
+	'GPU', 'CUDA', 'OpenCL', 'AI', 'AsAP',
+	'ADC', 'DAC', 'GS', 'SRD',
 	'CT', 'MRI',
 	'others' #FIXME Bad if occurs in title.
 ]
