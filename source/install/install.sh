@@ -29,7 +29,7 @@ then
 	echo "Not supported version of Ubuntu!"
 	exit 1
 fi
-sudo apt -y install python3-bibtexparser python3-requests
+sudo apt -y install python3-bibtexparser python3-requests python3-openpyxl
 sudo apt -y install python3-pip
 sudo pip3 install scholarly
 
