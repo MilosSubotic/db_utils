@@ -39,6 +39,8 @@ from scholarly import scholarly, ProxyGenerator
 #POSSIBLE_TITLES_PRINT_NUM = 1 # Just first
 POSSIBLE_TITLES_PRINT_NUM = 1000000 # All
 
+#TODO Check if bib_keys 'pages' occures for DB243 aka MWT_Spiral_Ant_Chamber
+# Need to merge from those two.
 unwanted_bib_keys = ['cites', 'gsrank', 'venue', 'eprint', 'abstract']
 
 #TODO Nicer
