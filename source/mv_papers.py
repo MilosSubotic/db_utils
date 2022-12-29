@@ -88,11 +88,15 @@ def fill_db(src, dst):
 			new_fields['`Where_searched`'] = 'Google Scholar'
 			s = d1.split(' - ')
 			if len(s) >= 2:
-				ws = s[-1]
-				sk = ' - '.join(s[0:-1])
-				if ws in ['google.com', 'Wiki']:
-					new_fields['`Where_searched`'] = ws
-					new_fields['`Search_keywords`'] = sk
+				show(s)
+				for ss in s[1:]:
+					show(ss)
+					if ss in ['google.com', 'Wiki', 'Youtube', 'MDPI']:
+						new_fields['`Where_searched`'] = ss
+						new_fields['`Search_keywords`'] = s[0]
+					elif ss.isnumeric():
+						new_fields['`Younger_than`'] = int(ss)
+						new_fields['`Search_keywords`'] = s[0]
 		elif reason == 'ref' or reason == 'refs':
 			new_fields['`Reference_from`'] = d1
 		elif reason == 'cites':
