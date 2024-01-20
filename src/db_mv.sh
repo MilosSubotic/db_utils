@@ -27,7 +27,7 @@ do
 done
 
 pushd "$D" 1>/dev/null
-mv_papers.py "$@"
+db_mv_papers.py "$@"
 R=$?
 popd 1>/dev/null
 
