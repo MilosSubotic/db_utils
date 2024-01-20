@@ -1,12 +1,5 @@
 #!/bin/bash
 ###############################################################################
-# Add to PATH.
-
-I=`dirname "${BASH_SOURCE[0]}"`
-P="`cd "$I/.." >/dev/null 2>&1 && pwd`"
-echo "export PATH=\$PATH:$P" >> ~/.profile
-
-###############################################################################
 # Check is this Ubuntu.
 
 DIST=`lsb_release --id | sed 's/^Distributor ID:[\t ]*\(.*\)$/\1/'`
