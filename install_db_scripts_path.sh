@@ -3,7 +3,7 @@
 # Add to PATH.
 
 I=`dirname "${BASH_SOURCE[0]}"`
-P="`cd "$I/src" >/dev/null 2>&1 && pwd`"
+P="`cd "$I/scripts" >/dev/null 2>&1 && pwd`"
 echo "export PATH=\$PATH:$P" >> ~/.profile
 
 ###############################################################################
