@@ -31,7 +31,7 @@ sudo pip3 install scholarly
 
 sudo apt -y install git build-essential cmake libsqlite3-dev libsqlcipher-dev
 sudo apt -y install qtbase5-dev qt5-qmake qttools5-dev-tools \
-	qtbase5-dev libqt5scintilla2-dev libqcustomplot-dev qttools5-dev
+	libqt5scintilla2-dev libqcustomplot-dev qttools5-dev
 git clone https://github.com/MilosSubotic/sqlitebrowser
 pushd sqlitebrowser
 git checkout file_name_stuff_qt5
