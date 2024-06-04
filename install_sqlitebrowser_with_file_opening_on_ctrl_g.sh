@@ -24,7 +24,8 @@ then
 fi
 sudo apt -y install python3-bibtexparser python3-requests python3-openpyxl
 sudo apt -y install python3-pip
-sudo pip3 install scholarly
+# Without sudo so proxy could pass to pip.
+pip3 install scholarly
 
 ###############################################################################
 # DB Browser for SQLite.
