@@ -25,7 +25,7 @@ fi
 sudo apt -y install python3-bibtexparser python3-requests python3-openpyxl
 sudo apt -y install python3-pip
 # Without sudo so proxy could pass to pip.
-pip3 install scholarly
+pip3 install --break-system-packages scholarly
 
 ###############################################################################
 # DB Browser for SQLite.
@@ -33,9 +33,8 @@ pip3 install scholarly
 sudo apt -y install git build-essential cmake libsqlite3-dev libsqlcipher-dev
 sudo apt -y install qtbase5-dev qt5-qmake qttools5-dev-tools \
 	libqt5scintilla2-dev libqcustomplot-dev qttools5-dev
-git clone https://github.com/MilosSubotic/sqlitebrowser
+git clone https://github.com/MilosSubotic/sqlitebrowser -b file_name_stuff_qt5
 pushd sqlitebrowser
-git checkout file_name_stuff_qt5
 mkdir build && cd build
 cmake -Dsqlcipher=1 -Wno-dev ..
 make -j4
