@@ -122,7 +122,7 @@ def get_json_from_request(r):
 		return r.json
 
 def create_parser():
-	parser = BibTexParser()
+	parser = BibTexParser(common_strings = True)
 	parser.ignore_nonstandard_types = False
 	parser.homogenize_fields = False
 	return parser
@@ -500,6 +500,7 @@ def update_bibtex_string(
 	
 	# Now have bs2.
 	
+	show(bs2)
 	bd2t = bib.loads(bs2, create_parser())
 
 	bd2 = BibDatabase()
