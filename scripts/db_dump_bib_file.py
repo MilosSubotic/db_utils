@@ -51,10 +51,11 @@ def dump_cites():
 	con.close()
 	
 	with open(cites_bib_file, 'w') as f:
-		for bs in bibtexes:
+		for i, bs in enumerate(bibtexes, 1):
 			if not bs:
 				# Empty BibTeX string.
 				continue
+			#print(i)
 
 			bd = bib.loads(bs, create_parser())
 			if len(bd.entries) == 0:
